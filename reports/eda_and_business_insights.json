@@ -1,0 +1,194 @@
+{
+    "kpis": {
+        "total_customers": 7043,
+        "churn_count": 1869,
+        "retained_count": 5174,
+        "churn_rate_pct": 26.54,
+        "total_monthly_revenue": 456116.6,
+        "monthly_revenue_at_risk": 139130.85,
+        "annual_revenue_at_risk": 1669570.2,
+        "churn_revenue_pct": 30.5
+    },
+    "breakdowns": {
+        "by_contract": [
+            {
+                "Contract": "Month-to-month",
+                "Total": 3875,
+                "Churned": 1655,
+                "MonthlySpend": 257294.15,
+                "Retained": 2220,
+                "ChurnRate": 42.71
+            },
+            {
+                "Contract": "One year",
+                "Total": 1473,
+                "Churned": 166,
+                "MonthlySpend": 95816.6,
+                "Retained": 1307,
+                "ChurnRate": 11.27
+            },
+            {
+                "Contract": "Two year",
+                "Total": 1695,
+                "Churned": 48,
+                "MonthlySpend": 103005.85,
+                "Retained": 1647,
+                "ChurnRate": 2.83
+            }
+        ],
+        "by_internet_service": [
+            {
+                "InternetService": "DSL",
+                "Total": 2421,
+                "Churned": 459,
+                "MonthlySpend": 140665.35,
+                "Retained": 1962,
+                "ChurnRate": 18.96
+            },
+            {
+                "InternetService": "Fiber optic",
+                "Total": 3096,
+                "Churned": 1297,
+                "MonthlySpend": 283284.4,
+                "Retained": 1799,
+                "ChurnRate": 41.89
+            },
+            {
+                "InternetService": "No",
+                "Total": 1526,
+                "Churned": 113,
+                "MonthlySpend": 32166.85,
+                "Retained": 1413,
+                "ChurnRate": 7.4
+            }
+        ],
+        "by_payment_method": [
+            {
+                "PaymentMethod": "Bank transfer (automatic)",
+                "Total": 1544,
+                "Churned": 258,
+                "MonthlySpend": 103745.45,
+                "Retained": 1286,
+                "ChurnRate": 16.71
+            },
+            {
+                "PaymentMethod": "Credit card (automatic)",
+                "Total": 1522,
+                "Churned": 232,
+                "MonthlySpend": 101231.85,
+                "Retained": 1290,
+                "ChurnRate": 15.24
+            },
+            {
+                "PaymentMethod": "Electronic check",
+                "Total": 2365,
+                "Churned": 1071,
+                "MonthlySpend": 180345.0,
+                "Retained": 1294,
+                "ChurnRate": 45.29
+            },
+            {
+                "PaymentMethod": "Mailed check",
+                "Total": 1612,
+                "Churned": 308,
+                "MonthlySpend": 70794.3,
+                "Retained": 1304,
+                "ChurnRate": 19.11
+            }
+        ],
+        "by_gender": [
+            {
+                "gender": "Female",
+                "Total": 3488,
+                "Churned": 939,
+                "MonthlySpend": 227432.4,
+                "Retained": 2549,
+                "ChurnRate": 26.92
+            },
+            {
+                "gender": "Male",
+                "Total": 3555,
+                "Churned": 930,
+                "MonthlySpend": 228684.2,
+                "Retained": 2625,
+                "ChurnRate": 26.16
+            }
+        ],
+        "by_tenure_bucket": [
+            {
+                "tenure_bucket": "Developing",
+                "Total": 1024,
+                "Churned": 294,
+                "MonthlySpend": 62829.85,
+                "Retained": 730,
+                "ChurnRate": 28.71
+            },
+            {
+                "tenure_bucket": "Loyal",
+                "Total": 2239,
+                "Churned": 213,
+                "MonthlySpend": 165563.7,
+                "Retained": 2026,
+                "ChurnRate": 9.51
+            },
+            {
+                "tenure_bucket": "New",
+                "Total": 2186,
+                "Churned": 1037,
+                "MonthlySpend": 122629.75,
+                "Retained": 1149,
+                "ChurnRate": 47.44
+            },
+            {
+                "tenure_bucket": "Stable",
+                "Total": 1594,
+                "Churned": 325,
+                "MonthlySpend": 105093.3,
+                "Retained": 1269,
+                "ChurnRate": 20.39
+            }
+        ]
+    },
+    "distributions": {
+        "tenure_stats": {
+            "churned_mean": 17.98,
+            "retained_mean": 37.57
+        },
+        "charges_stats": {
+            "churned_mean": 74.44,
+            "retained_mean": 61.27
+        }
+    },
+    "recommendations": [
+        {
+            "priority": "P1 - Critical",
+            "theme": "Month-to-Month Contract Transition",
+            "finding": "Month-to-month subscribers account for over 88% of all churn events with a 42.7% attrition rate.",
+            "action": "Incentivize 1-year commitments with a 15% discount or bundled streaming benefits; implement automated renewal nudges at month 3 and month 6."
+        },
+        {
+            "priority": "P1 - Critical",
+            "theme": "Fiber Optic Value & Support Gap",
+            "finding": "Fiber Optic customers experience higher monthly charges ($80+) and churn at 41.9% due to lack of complementary technical assistance.",
+            "action": "Bundle complimentary TechSupport and Online Security into high-speed fiber tiers to protect high-ARPU subscribers."
+        },
+        {
+            "priority": "P2 - High",
+            "theme": "Electronic Check Payment Friction",
+            "finding": "Customers using Electronic Check experience a 45.3% churn rate vs 15.2% for automated bank/credit card transfers.",
+            "action": "Offer a one-time $10 credit to migrate electronic check customers to automated credit card / ACH autopay."
+        },
+        {
+            "priority": "P3 - Medium",
+            "theme": "New Customer Lifecycle Onboarding",
+            "finding": "The highest attrition velocity occurs during months 1\u20136 (tenure <= 6).",
+            "action": "Deploy a high-touch 90-day onboarding program, automated satisfaction check-ins, and priority support routing for new signups."
+        }
+    ],
+    "figures": {
+        "churn_distribution": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\eda_churn_distribution.png",
+        "churn_by_contract": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\eda_churn_by_contract.png",
+        "tenure_distribution": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\eda_tenure_distribution.png",
+        "correlation_heatmap": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\eda_correlation_heatmap.png"
+    }
+}

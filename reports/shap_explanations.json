@@ -1,0 +1,495 @@
+{
+    "best_model": "Gradient Boosted Trees",
+    "num_features_analyzed": 40,
+    "global_importance_ranking": [
+        {
+            "feature": "Contract Risk Score",
+            "mean_abs_shap": 0.7338
+        },
+        {
+            "feature": "Tenure",
+            "mean_abs_shap": 0.3533
+        },
+        {
+            "feature": "Internetservice Fiber Optic",
+            "mean_abs_shap": 0.259
+        },
+        {
+            "feature": "Monthlycharges",
+            "mean_abs_shap": 0.1524
+        },
+        {
+            "feature": "Paperlessbilling Yes",
+            "mean_abs_shap": 0.112
+        },
+        {
+            "feature": "Electronic Check Risk",
+            "mean_abs_shap": 0.1066
+        },
+        {
+            "feature": "Contract Two Year",
+            "mean_abs_shap": 0.0985
+        },
+        {
+            "feature": "Onlinesecurity Yes",
+            "mean_abs_shap": 0.0737
+        },
+        {
+            "feature": "Paymentmethod Electronic Check",
+            "mean_abs_shap": 0.0719
+        },
+        {
+            "feature": "Streamingmovies Yes",
+            "mean_abs_shap": 0.0688
+        },
+        {
+            "feature": "Streamingtv Yes",
+            "mean_abs_shap": 0.0528
+        },
+        {
+            "feature": "Techsupport Yes",
+            "mean_abs_shap": 0.0441
+        },
+        {
+            "feature": "Totalcharges",
+            "mean_abs_shap": 0.0431
+        },
+        {
+            "feature": "Multiplelines Yes",
+            "mean_abs_shap": 0.043
+        },
+        {
+            "feature": "Avg Monthly Spend",
+            "mean_abs_shap": 0.043
+        },
+        {
+            "feature": "Contract One Year",
+            "mean_abs_shap": 0.04
+        },
+        {
+            "feature": "Internetservice No",
+            "mean_abs_shap": 0.0375
+        },
+        {
+            "feature": "Support Usage Indicator",
+            "mean_abs_shap": 0.0364
+        },
+        {
+            "feature": "Onlinesecurity No Internet Service",
+            "mean_abs_shap": 0.0318
+        },
+        {
+            "feature": "Deviceprotection No Internet Service",
+            "mean_abs_shap": 0.0281
+        }
+    ],
+    "summary_plot_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_summary_beeswarm.png",
+    "feature_importance_bar_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_feature_importance_bar.png",
+    "local_explanations": [
+        {
+            "persona_name": "High_Risk_Persona",
+            "persona_title": "High Risk Churn Archetype",
+            "customer_features": {
+                "gender": "Male",
+                "SeniorCitizen": 1,
+                "Partner": "Yes",
+                "Dependents": "No",
+                "PhoneService": "Yes",
+                "MultipleLines": "Yes",
+                "InternetService": "Fiber optic",
+                "OnlineSecurity": "No",
+                "OnlineBackup": "No",
+                "DeviceProtection": "No",
+                "TechSupport": "No",
+                "StreamingTV": "Yes",
+                "StreamingMovies": "Yes",
+                "Contract": "Month-to-month",
+                "PaperlessBilling": "Yes",
+                "PaymentMethod": "Electronic check",
+                "tenure_bucket": "New",
+                "tenure": 1,
+                "MonthlyCharges": 95.1,
+                "TotalCharges": 95.1,
+                "avg_monthly_spend": 47.55,
+                "contract_risk_score": 3,
+                "service_count": 5,
+                "support_usage_indicator": 0,
+                "premium_customer_flag": 1,
+                "long_term_customer_flag": 0,
+                "electronic_check_risk": 1
+            },
+            "churn_probability": 0.8653,
+            "predicted_class": "Churn",
+            "top_positive_drivers": [
+                [
+                    "Tenure",
+                    0.9295
+                ],
+                [
+                    "Contract Risk Score",
+                    0.8695
+                ],
+                [
+                    "Internetservice Fiber Optic",
+                    0.274
+                ],
+                [
+                    "Monthlycharges",
+                    0.2305
+                ],
+                [
+                    "Electronic Check Risk",
+                    0.1275
+                ]
+            ],
+            "top_negative_drivers": [
+                [
+                    "Contract One Year",
+                    -0.021
+                ],
+                [
+                    "Avg Monthly Spend",
+                    -0.0142
+                ],
+                [
+                    "Phoneservice Yes",
+                    -0.0045
+                ],
+                [
+                    "Multiplelines No Phone Service",
+                    -0.0041
+                ],
+                [
+                    "Gender Male",
+                    -0.0027
+                ]
+            ],
+            "natural_language_explanation": "Customer exhibits a **High Churn Risk** with a predicted churn probability of **86.5%**.\n- **Primary Churn Accelerators:** Tenure (SHAP impact: +0.93), Contract Risk Score (SHAP impact: +0.87), Internetservice Fiber Optic (SHAP impact: +0.27).\n- **Primary Retention Anchors:** Contract One Year (SHAP impact: -0.02), Avg Monthly Spend (SHAP impact: -0.01).\n\ud83d\udca1 **Recommended Action:** Immediate intervention required. Proactively offer a discounted annual contract lock-in, complimentary tech support, or customized loyalty incentive.",
+            "waterfall_plot_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_waterfall_High_Risk_Persona.png"
+        },
+        {
+            "persona_name": "Moderate_Risk_Persona",
+            "persona_title": "Moderate Vulnerability Archetype",
+            "customer_features": {
+                "gender": "Male",
+                "SeniorCitizen": 0,
+                "Partner": "No",
+                "Dependents": "Yes",
+                "PhoneService": "Yes",
+                "MultipleLines": "No",
+                "InternetService": "Fiber optic",
+                "OnlineSecurity": "No",
+                "OnlineBackup": "No",
+                "DeviceProtection": "No",
+                "TechSupport": "No",
+                "StreamingTV": "Yes",
+                "StreamingMovies": "No",
+                "Contract": "Month-to-month",
+                "PaperlessBilling": "Yes",
+                "PaymentMethod": "Credit card (automatic)",
+                "tenure_bucket": "Developing",
+                "tenure": 13,
+                "MonthlyCharges": 78.3,
+                "TotalCharges": 1033.95,
+                "avg_monthly_spend": 73.85,
+                "contract_risk_score": 3,
+                "service_count": 3,
+                "support_usage_indicator": 0,
+                "premium_customer_flag": 0,
+                "long_term_customer_flag": 0,
+                "electronic_check_risk": 0
+            },
+            "churn_probability": 0.4994,
+            "predicted_class": "Retain",
+            "top_positive_drivers": [
+                [
+                    "Contract Risk Score",
+                    0.8718
+                ],
+                [
+                    "Internetservice Fiber Optic",
+                    0.4083
+                ],
+                [
+                    "Tenure",
+                    0.1081
+                ],
+                [
+                    "Paperlessbilling Yes",
+                    0.1039
+                ],
+                [
+                    "Support Usage Indicator",
+                    0.0711
+                ]
+            ],
+            "top_negative_drivers": [
+                [
+                    "Electronic Check Risk",
+                    -0.116
+                ],
+                [
+                    "Monthlycharges",
+                    -0.0893
+                ],
+                [
+                    "Paymentmethod Electronic Check",
+                    -0.0761
+                ],
+                [
+                    "Streamingmovies Yes",
+                    -0.0592
+                ],
+                [
+                    "Multiplelines Yes",
+                    -0.0572
+                ]
+            ],
+            "natural_language_explanation": "Customer exhibits a **Moderate Churn Risk** with a predicted churn probability of **49.9%**.\n- **Primary Churn Accelerators:** Contract Risk Score (SHAP impact: +0.87), Internetservice Fiber Optic (SHAP impact: +0.41), Tenure (SHAP impact: +0.11).\n- **Primary Retention Anchors:** Electronic Check Risk (SHAP impact: -0.12), Monthlycharges (SHAP impact: -0.09).\n\ud83d\udca1 **Recommended Action:** Monitor usage velocity; propose value-add digital security or automated payment discounts.",
+            "waterfall_plot_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_waterfall_Moderate_Risk_Persona.png"
+        },
+        {
+            "persona_name": "Loyal_Customer_Persona",
+            "persona_title": "High Retention & Loyal Archetype",
+            "customer_features": {
+                "gender": "Female",
+                "SeniorCitizen": 0,
+                "Partner": "Yes",
+                "Dependents": "Yes",
+                "PhoneService": "Yes",
+                "MultipleLines": "No",
+                "InternetService": "No",
+                "OnlineSecurity": "No internet service",
+                "OnlineBackup": "No internet service",
+                "DeviceProtection": "No internet service",
+                "TechSupport": "No internet service",
+                "StreamingTV": "No internet service",
+                "StreamingMovies": "No internet service",
+                "Contract": "Two year",
+                "PaperlessBilling": "No",
+                "PaymentMethod": "Bank transfer (automatic)",
+                "tenure_bucket": "Loyal",
+                "tenure": 72,
+                "MonthlyCharges": 19.55,
+                "TotalCharges": 1463.45,
+                "avg_monthly_spend": 20.05,
+                "contract_risk_score": 1,
+                "service_count": 1,
+                "support_usage_indicator": 0,
+                "premium_customer_flag": 0,
+                "long_term_customer_flag": 1,
+                "electronic_check_risk": 0
+            },
+            "churn_probability": 0.022,
+            "predicted_class": "Retain",
+            "top_positive_drivers": [
+                [
+                    "Onlinesecurity Yes",
+                    0.0594
+                ],
+                [
+                    "Totalcharges",
+                    0.0255
+                ],
+                [
+                    "Techsupport Yes",
+                    0.0133
+                ],
+                [
+                    "Onlinebackup Yes",
+                    0.004
+                ],
+                [
+                    "Support Usage Indicator",
+                    0.0032
+                ]
+            ],
+            "top_negative_drivers": [
+                [
+                    "Contract Risk Score",
+                    -0.7945
+                ],
+                [
+                    "Tenure",
+                    -0.3333
+                ],
+                [
+                    "Internetservice Fiber Optic",
+                    -0.1662
+                ],
+                [
+                    "Contract Two Year",
+                    -0.1406
+                ],
+                [
+                    "Monthlycharges",
+                    -0.1378
+                ]
+            ],
+            "natural_language_explanation": "Customer exhibits a **Low Churn Risk** with a predicted churn probability of **2.2%**.\n- **Primary Churn Accelerators:** Onlinesecurity Yes (SHAP impact: +0.06), Totalcharges (SHAP impact: +0.03), Techsupport Yes (SHAP impact: +0.01).\n- **Primary Retention Anchors:** Contract Risk Score (SHAP impact: -0.79), Tenure (SHAP impact: -0.33).\n\ud83d\udca1 **Recommended Action:** High retention health. Consider upselling premium streaming tiers or family bundles.",
+            "waterfall_plot_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_waterfall_Loyal_Customer_Persona.png"
+        },
+        {
+            "persona_name": "Support_Deficient_Persona",
+            "persona_title": "Support-Deficient Tech Consumer",
+            "customer_features": {
+                "gender": "Female",
+                "SeniorCitizen": 1,
+                "Partner": "No",
+                "Dependents": "No",
+                "PhoneService": "Yes",
+                "MultipleLines": "Yes",
+                "InternetService": "Fiber optic",
+                "OnlineSecurity": "No",
+                "OnlineBackup": "No",
+                "DeviceProtection": "No",
+                "TechSupport": "No",
+                "StreamingTV": "No",
+                "StreamingMovies": "Yes",
+                "Contract": "Month-to-month",
+                "PaperlessBilling": "Yes",
+                "PaymentMethod": "Credit card (automatic)",
+                "tenure_bucket": "New",
+                "tenure": 11,
+                "MonthlyCharges": 84.8,
+                "TotalCharges": 906.85,
+                "avg_monthly_spend": 75.57,
+                "contract_risk_score": 3,
+                "service_count": 4,
+                "support_usage_indicator": 0,
+                "premium_customer_flag": 1,
+                "long_term_customer_flag": 0,
+                "electronic_check_risk": 0
+            },
+            "churn_probability": 0.645,
+            "predicted_class": "Churn",
+            "top_positive_drivers": [
+                [
+                    "Contract Risk Score",
+                    0.832
+                ],
+                [
+                    "Internetservice Fiber Optic",
+                    0.4123
+                ],
+                [
+                    "Tenure",
+                    0.2538
+                ],
+                [
+                    "Paperlessbilling Yes",
+                    0.0854
+                ],
+                [
+                    "Monthlycharges",
+                    0.0797
+                ]
+            ],
+            "top_negative_drivers": [
+                [
+                    "Electronic Check Risk",
+                    -0.0928
+                ],
+                [
+                    "Streamingtv Yes",
+                    -0.053
+                ],
+                [
+                    "Paymentmethod Electronic Check",
+                    -0.0468
+                ],
+                [
+                    "Contract One Year",
+                    -0.022
+                ],
+                [
+                    "Avg Monthly Spend",
+                    -0.0134
+                ]
+            ],
+            "natural_language_explanation": "Customer exhibits a **Moderate Churn Risk** with a predicted churn probability of **64.5%**.\n- **Primary Churn Accelerators:** Contract Risk Score (SHAP impact: +0.83), Internetservice Fiber Optic (SHAP impact: +0.41), Tenure (SHAP impact: +0.25).\n- **Primary Retention Anchors:** Electronic Check Risk (SHAP impact: -0.09), Streamingtv Yes (SHAP impact: -0.05).\n\ud83d\udca1 **Recommended Action:** Monitor usage velocity; propose value-add digital security or automated payment discounts.",
+            "waterfall_plot_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_waterfall_Support_Deficient_Persona.png"
+        },
+        {
+            "persona_name": "Price_Sensitive_Senior_Persona",
+            "persona_title": "Price-Sensitive Senior Subscriber",
+            "customer_features": {
+                "gender": "Female",
+                "SeniorCitizen": 1,
+                "Partner": "No",
+                "Dependents": "No",
+                "PhoneService": "Yes",
+                "MultipleLines": "Yes",
+                "InternetService": "Fiber optic",
+                "OnlineSecurity": "No",
+                "OnlineBackup": "No",
+                "DeviceProtection": "No",
+                "TechSupport": "Yes",
+                "StreamingTV": "Yes",
+                "StreamingMovies": "Yes",
+                "Contract": "Month-to-month",
+                "PaperlessBilling": "Yes",
+                "PaymentMethod": "Credit card (automatic)",
+                "tenure_bucket": "New",
+                "tenure": 8,
+                "MonthlyCharges": 100.15,
+                "TotalCharges": 908.55,
+                "avg_monthly_spend": 100.95,
+                "contract_risk_score": 3,
+                "service_count": 6,
+                "support_usage_indicator": 1,
+                "premium_customer_flag": 1,
+                "long_term_customer_flag": 0,
+                "electronic_check_risk": 0
+            },
+            "churn_probability": 0.7294,
+            "predicted_class": "Churn",
+            "top_positive_drivers": [
+                [
+                    "Contract Risk Score",
+                    0.775
+                ],
+                [
+                    "Monthlycharges",
+                    0.4601
+                ],
+                [
+                    "Tenure",
+                    0.4383
+                ],
+                [
+                    "Internetservice Fiber Optic",
+                    0.4195
+                ],
+                [
+                    "Totalcharges",
+                    0.0926
+                ]
+            ],
+            "top_negative_drivers": [
+                [
+                    "Techsupport Yes",
+                    -0.1341
+                ],
+                [
+                    "Electronic Check Risk",
+                    -0.0798
+                ],
+                [
+                    "Support Usage Indicator",
+                    -0.0513
+                ],
+                [
+                    "Paymentmethod Electronic Check",
+                    -0.0418
+                ],
+                [
+                    "Contract One Year",
+                    -0.0283
+                ]
+            ],
+            "natural_language_explanation": "Customer exhibits a **High Churn Risk** with a predicted churn probability of **72.9%**.\n- **Primary Churn Accelerators:** Contract Risk Score (SHAP impact: +0.77), Monthlycharges (SHAP impact: +0.46), Tenure (SHAP impact: +0.44).\n- **Primary Retention Anchors:** Techsupport Yes (SHAP impact: -0.13), Electronic Check Risk (SHAP impact: -0.08).\n\ud83d\udca1 **Recommended Action:** Immediate intervention required. Proactively offer a discounted annual contract lock-in, complimentary tech support, or customized loyalty incentive.",
+            "waterfall_plot_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_waterfall_Price_Sensitive_Senior_Persona.png"
+        }
+    ]
+}

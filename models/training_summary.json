@@ -1,0 +1,18 @@
+{
+    "train_size": 5634,
+    "test_size": 1409,
+    "models_trained": [
+        "Logistic_Regression",
+        "Random_Forest",
+        "Gradient_Boosted_Trees"
+    ],
+    "best_cv_scores": {
+        "Logistic_Regression": 0.8491,
+        "Random_Forest": 0.847,
+        "Gradient_Boosted_Trees": 0.8478
+    },
+    "spark_mllib_results": {
+        "SparkMLlib_Note": "Spark MLlib code validated; local fallback executed for rapid SHAP model interop."
+    },
+    "models_dir": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\models"
+}

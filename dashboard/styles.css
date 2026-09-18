@@ -1,0 +1,89 @@
+/* Custom Premium Styling for Churn Analytics Dashboard */
+
+:root {
+    --primary-accent: #3b82f6;
+    --secondary-accent: #6366f1;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.12);
+}
+
+.main {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Metric card styling */
+.metric-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.7) 100%);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-accent);
+}
+
+.metric-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.metric-subtitle {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 0.35rem;
+}
+
+/* Status badges */
+.badge-danger {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.badge-success {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.badge-warning {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* Callout Box */
+.insight-box {
+    background: rgba(59, 130, 246, 0.08);
+    border-left: 4px solid #3b82f6;
+    border-radius: 0 8px 8px 0;
+    padding: 1rem;
+    margin: 1rem 0;
+}

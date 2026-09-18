@@ -1,0 +1,198 @@
+{
+    "initial_rows": 7043,
+    "final_rows": 7043,
+    "duplicates_removed": 0,
+    "total_charges_blanks": 11,
+    "median_total_charges": 1397.475,
+    "missing_summary": [
+        {
+            "Column": "customerID",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 7043
+        },
+        {
+            "Column": "gender",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 2
+        },
+        {
+            "Column": "SeniorCitizen",
+            "DataType": "int64",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 2
+        },
+        {
+            "Column": "Partner",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 2
+        },
+        {
+            "Column": "Dependents",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 2
+        },
+        {
+            "Column": "tenure",
+            "DataType": "int64",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 73
+        },
+        {
+            "Column": "PhoneService",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 2
+        },
+        {
+            "Column": "MultipleLines",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 3
+        },
+        {
+            "Column": "InternetService",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 3
+        },
+        {
+            "Column": "OnlineSecurity",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 3
+        },
+        {
+            "Column": "OnlineBackup",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 3
+        },
+        {
+            "Column": "DeviceProtection",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 3
+        },
+        {
+            "Column": "TechSupport",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 3
+        },
+        {
+            "Column": "StreamingTV",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 3
+        },
+        {
+            "Column": "StreamingMovies",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 3
+        },
+        {
+            "Column": "Contract",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 3
+        },
+        {
+            "Column": "PaperlessBilling",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 2
+        },
+        {
+            "Column": "PaymentMethod",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 4
+        },
+        {
+            "Column": "MonthlyCharges",
+            "DataType": "float64",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 1585
+        },
+        {
+            "Column": "TotalCharges",
+            "DataType": "float64",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 6531
+        },
+        {
+            "Column": "Churn",
+            "DataType": "object",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 2
+        },
+        {
+            "Column": "Churn_Numeric",
+            "DataType": "int64",
+            "NullCount": 0,
+            "NullPercentage": 0.0,
+            "UniqueValues": 2
+        }
+    ],
+    "num_summary": [
+        {
+            "Feature": "tenure",
+            "count": 7043.0,
+            "mean": 32.37,
+            "std": 24.56,
+            "min": 0.0,
+            "25%": 9.0,
+            "50%": 29.0,
+            "75%": 55.0,
+            "max": 72.0
+        },
+        {
+            "Feature": "MonthlyCharges",
+            "count": 7043.0,
+            "mean": 64.76,
+            "std": 30.09,
+            "min": 18.25,
+            "25%": 35.5,
+            "50%": 70.35,
+            "75%": 89.85,
+            "max": 118.75
+        },
+        {
+            "Feature": "TotalCharges",
+            "count": 7043.0,
+            "mean": 2281.92,
+            "std": 2265.27,
+            "min": 18.8,
+            "25%": 402.22,
+            "50%": 1397.48,
+            "75%": 3786.6,
+            "max": 8684.8
+        }
+    ]
+}
