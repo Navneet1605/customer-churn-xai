@@ -118,9 +118,7 @@ customer-churn-xai/
 │   ├── explainability.py                              # Phase 7: SHAP XAI engine
 │   ├── dashboard_data.py                              # Phase 3 & 8: EDA & BI metrics
 │   └── generate_report.py                             # Phase 11: PDF/MD generator
-├── dashboard/
-│   ├── app.py                                         # Multi-page Streamlit application
-│   └── styles.css                                     # Glassmorphic custom styling
+├── app.py                                             # Master Streamlit Dashboard (Premium UI)
 ├── models/                                            # Serialized pipelines & models
 │   ├── Logistic_Regression_pipeline.pkl
 │   ├── Random_Forest_pipeline.pkl
@@ -184,8 +182,8 @@ Constructs automated ML pipelines, evaluates models across Stratified 3-Fold Cro
 ### Phase 7: Explainable AI with SHAP (`src/explainability.py`)
 Computes global Shapley values (summary beeswarm, feature importance bar chart) and local waterfall/force explanations for 5 representative customer personas.
 
-### Phase 9 & 10: Streamlit Web Dashboard (`dashboard/app.py`)
-A reactive multi-page web application with interactive Plotly graphics, real-time single-customer risk scoring with live SHAP waterfall plots, batch CSV predictions, and report downloaders.
+### Phase 9 & 10: Streamlit Web Dashboard (`app.py`)
+A reactive multi-page web application featuring a highly aesthetic, premium dark-mode UI with an Emerald & Soft Rose palette. It includes interactive Plotly graphics, real-time single-customer risk scoring with live SHAP waterfall plots, batch CSV predictions, and report downloaders.
 
 ### Phase 11: Automated Executive Reporting (`src/generate_report.py`)
 Produces publication-grade Markdown (`reports/final_report.md`) and PDF (`reports/final_report.pdf`) summaries.
@@ -228,7 +226,7 @@ pip install -r requirements.txt
 python run_pipeline.py
 
 # 4. Launch the interactive Streamlit Dashboard
-python -m streamlit run dashboard/app.py
+python -m streamlit run app.py
 ```
 
 ### 2. Google Colab Execution
@@ -242,7 +240,7 @@ To run in Google Colab:
 !python run_pipeline.py
 
 # Launch Streamlit in Colab via localtunnel:
-!streamlit run dashboard/app.py & npx localtunnel --port 8501
+!streamlit run app.py & npx localtunnel --port 8501
 ```
 
 ### 3. Databricks Execution
