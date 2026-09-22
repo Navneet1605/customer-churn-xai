@@ -1,6 +1,6 @@
 {
-    "source_file": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\data\\raw\\WA_Fn-UseC_-Telco-Customer-Churn.csv",
-    "engine": "PyArrow / Pandas",
+    "source_file": "C:\\Users\\dwijn\\Big Data\\customer-churn-xai\\data\\raw\\WA_Fn-UseC_-Telco-Customer-Churn.csv",
+    "engine": "Apache Spark (PySpark)",
     "columns": [
         "customerID",
         "gender",
@@ -27,27 +27,27 @@
     "num_rows": 7043,
     "num_cols": 21,
     "schema": {
-        "customerID": "object",
-        "gender": "object",
-        "SeniorCitizen": "int64",
-        "Partner": "object",
-        "Dependents": "object",
-        "tenure": "int64",
-        "PhoneService": "object",
-        "MultipleLines": "object",
-        "InternetService": "object",
-        "OnlineSecurity": "object",
-        "OnlineBackup": "object",
-        "DeviceProtection": "object",
-        "TechSupport": "object",
-        "StreamingTV": "object",
-        "StreamingMovies": "object",
-        "Contract": "object",
-        "PaperlessBilling": "object",
-        "PaymentMethod": "object",
-        "MonthlyCharges": "float64",
-        "TotalCharges": "object",
-        "Churn": "object"
+        "customerID": "StringType()",
+        "gender": "StringType()",
+        "SeniorCitizen": "IntegerType()",
+        "Partner": "StringType()",
+        "Dependents": "StringType()",
+        "tenure": "IntegerType()",
+        "PhoneService": "StringType()",
+        "MultipleLines": "StringType()",
+        "InternetService": "StringType()",
+        "OnlineSecurity": "StringType()",
+        "OnlineBackup": "StringType()",
+        "DeviceProtection": "StringType()",
+        "TechSupport": "StringType()",
+        "StreamingTV": "StringType()",
+        "StreamingMovies": "StringType()",
+        "Contract": "StringType()",
+        "PaperlessBilling": "StringType()",
+        "PaymentMethod": "StringType()",
+        "MonthlyCharges": "DoubleType()",
+        "TotalCharges": "StringType()",
+        "Churn": "StringType()"
     },
     "null_counts": {
         "customerID": 0,
@@ -72,6 +72,6 @@
         "TotalCharges": 11,
         "Churn": 0
     },
-    "hdfs_storage_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\data\\hdfs_simulation\\warehouse\\telco",
-    "output_parquet_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\data\\processed\\cleaned_telco.parquet"
+    "hdfs_storage_path": "C:\\Users\\dwijn\\Big Data\\customer-churn-xai\\data\\hdfs_simulation\\warehouse\\telco",
+    "output_parquet_path": "C:\\Users\\dwijn\\Big Data\\customer-churn-xai\\data\\processed\\cleaned_telco.parquet"
 }

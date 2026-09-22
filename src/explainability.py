@@ -117,7 +117,7 @@ def run_explainability(
     cat_cols = [c for c in X_train.columns if X_train[c].dtype == "object" or c == "SeniorCitizen"]
     num_cols = [c for c in X_train.columns if c not in cat_cols]
     
-    cat_feature_names = list(cat_encoder.get_feature_names_out(cat_cols))
+    cat_feature_names = list(cat_encoder.get_feature_names_out())
     all_feature_names = num_cols + cat_feature_names
     # Shorten feature names for clean plotting
     readable_feature_names = [

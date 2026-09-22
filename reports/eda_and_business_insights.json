@@ -186,9 +186,9 @@
         }
     ],
     "figures": {
-        "churn_distribution": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\eda_churn_distribution.png",
-        "churn_by_contract": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\eda_churn_by_contract.png",
-        "tenure_distribution": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\eda_tenure_distribution.png",
-        "correlation_heatmap": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\eda_correlation_heatmap.png"
+        "churn_distribution": "C:\\Users\\dwijn\\Big Data\\customer-churn-xai\\reports\\figures\\eda_churn_distribution.png",
+        "churn_by_contract": "C:\\Users\\dwijn\\Big Data\\customer-churn-xai\\reports\\figures\\eda_churn_by_contract.png",
+        "tenure_distribution": "C:\\Users\\dwijn\\Big Data\\customer-churn-xai\\reports\\figures\\eda_tenure_distribution.png",
+        "correlation_heatmap": "C:\\Users\\dwijn\\Big Data\\customer-churn-xai\\reports\\figures\\eda_correlation_heatmap.png"
     }
 }
