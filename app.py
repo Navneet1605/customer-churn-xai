@@ -578,14 +578,50 @@ elif page_selection == "Live Churn Inference & Explainability":
 
                 churn_prob = float(champion_pipeline.predict_proba(input_df)[0, 1])
 
-                st.markdown(
-                    f"""
-                    <div class="metric-card" style="margin-bottom: 2rem;">
-                        <div class="metric-title">Churn Probability Score</div>
-                        <div class="metric-value">{churn_prob:.4f}</div>
-                    </div>
-                    """, unsafe_allow_html=True
+                churn_pct = churn_prob * 100
+                if churn_pct < 30:
+                    risk_level = "LOW RISK"
+                    gauge_color = "#10b981"
+                elif churn_pct < 60:
+                    risk_level = "MODERATE RISK"
+                    gauge_color = "#f59e0b"
+                else:
+                    risk_level = "HIGH RISK"
+                    gauge_color = "#f43f5e"
+
+                fig_gauge = go.Figure(go.Indicator(
+                    mode="gauge+number",
+                    value=churn_pct,
+                    number={"suffix": "%", "font": {"size": 32, "color": "#ffffff", "family": "Inter, sans-serif"}, "valueformat": ".1f"},
+                    title={"text": f"<b>CHURN RISK DIAL</b><br><span style='color:{gauge_color}; font-size: 14px;'>Status: {risk_level}</span>", "font": {"size": 16, "color": "#94a3b8"}},
+                    gauge={
+                        "axis": {"range": [0, 100], "tickwidth": 1, "tickcolor": "#475569", "tickfont": {"color": "#94a3b8"}},
+                        "bar": {"color": gauge_color, "thickness": 0.3},
+                        "bgcolor": "rgba(15, 23, 42, 0.6)",
+                        "borderwidth": 1,
+                        "bordercolor": "#334155",
+                        "steps": [
+                            {"range": [0, 30], "color": "rgba(16, 185, 129, 0.2)"},
+                            {"range": [30, 60], "color": "rgba(245, 158, 11, 0.2)"},
+                            {"range": [60, 100], "color": "rgba(244, 63, 94, 0.2)"}
+                        ],
+                        "threshold": {
+                            "line": {"color": "#ffffff", "width": 3},
+                            "thickness": 0.8,
+                            "value": churn_pct
+                        }
+                    }
+                ))
+
+                fig_gauge.update_layout(
+                    height=240,
+                    margin=dict(l=25, r=25, t=55, b=10),
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    font={"color": "white"}
                 )
+
+                st.plotly_chart(fig_gauge, use_container_width=True)
 
                 preproc = live_explainer["preprocessor"]
                 explainer = live_explainer["explainer"]
