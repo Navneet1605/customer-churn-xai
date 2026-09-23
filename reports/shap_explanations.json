@@ -83,8 +83,8 @@
             "mean_abs_shap": 0.0281
         }
     ],
-    "summary_plot_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_summary_beeswarm.png",
-    "feature_importance_bar_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_feature_importance_bar.png",
+    "summary_plot_path": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\reports\\figures\\shap_summary_beeswarm.png",
+    "feature_importance_bar_path": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\reports\\figures\\shap_feature_importance_bar.png",
     "local_explanations": [
         {
             "persona_name": "High_Risk_Persona",
@@ -165,7 +165,7 @@
                 ]
             ],
             "natural_language_explanation": "Customer exhibits a **High Churn Risk** with a predicted churn probability of **86.5%**.\n- **Primary Churn Accelerators:** Tenure (SHAP impact: +0.93), Contract Risk Score (SHAP impact: +0.87), Internetservice Fiber Optic (SHAP impact: +0.27).\n- **Primary Retention Anchors:** Contract One Year (SHAP impact: -0.02), Avg Monthly Spend (SHAP impact: -0.01).\n\ud83d\udca1 **Recommended Action:** Immediate intervention required. Proactively offer a discounted annual contract lock-in, complimentary tech support, or customized loyalty incentive.",
-            "waterfall_plot_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_waterfall_High_Risk_Persona.png"
+            "waterfall_plot_path": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\reports\\figures\\shap_waterfall_High_Risk_Persona.png"
         },
         {
             "persona_name": "Moderate_Risk_Persona",
@@ -246,7 +246,7 @@
                 ]
             ],
             "natural_language_explanation": "Customer exhibits a **Moderate Churn Risk** with a predicted churn probability of **49.9%**.\n- **Primary Churn Accelerators:** Contract Risk Score (SHAP impact: +0.87), Internetservice Fiber Optic (SHAP impact: +0.41), Tenure (SHAP impact: +0.11).\n- **Primary Retention Anchors:** Electronic Check Risk (SHAP impact: -0.12), Monthlycharges (SHAP impact: -0.09).\n\ud83d\udca1 **Recommended Action:** Monitor usage velocity; propose value-add digital security or automated payment discounts.",
-            "waterfall_plot_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_waterfall_Moderate_Risk_Persona.png"
+            "waterfall_plot_path": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\reports\\figures\\shap_waterfall_Moderate_Risk_Persona.png"
         },
         {
             "persona_name": "Loyal_Customer_Persona",
@@ -327,7 +327,7 @@
                 ]
             ],
             "natural_language_explanation": "Customer exhibits a **Low Churn Risk** with a predicted churn probability of **2.2%**.\n- **Primary Churn Accelerators:** Onlinesecurity Yes (SHAP impact: +0.06), Totalcharges (SHAP impact: +0.03), Techsupport Yes (SHAP impact: +0.01).\n- **Primary Retention Anchors:** Contract Risk Score (SHAP impact: -0.79), Tenure (SHAP impact: -0.33).\n\ud83d\udca1 **Recommended Action:** High retention health. Consider upselling premium streaming tiers or family bundles.",
-            "waterfall_plot_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_waterfall_Loyal_Customer_Persona.png"
+            "waterfall_plot_path": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\reports\\figures\\shap_waterfall_Loyal_Customer_Persona.png"
         },
         {
             "persona_name": "Support_Deficient_Persona",
@@ -408,7 +408,7 @@
                 ]
             ],
             "natural_language_explanation": "Customer exhibits a **Moderate Churn Risk** with a predicted churn probability of **64.5%**.\n- **Primary Churn Accelerators:** Contract Risk Score (SHAP impact: +0.83), Internetservice Fiber Optic (SHAP impact: +0.41), Tenure (SHAP impact: +0.25).\n- **Primary Retention Anchors:** Electronic Check Risk (SHAP impact: -0.09), Streamingtv Yes (SHAP impact: -0.05).\n\ud83d\udca1 **Recommended Action:** Monitor usage velocity; propose value-add digital security or automated payment discounts.",
-            "waterfall_plot_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_waterfall_Support_Deficient_Persona.png"
+            "waterfall_plot_path": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\reports\\figures\\shap_waterfall_Support_Deficient_Persona.png"
         },
         {
             "persona_name": "Price_Sensitive_Senior_Persona",
@@ -489,7 +489,7 @@
                 ]
             ],
             "natural_language_explanation": "Customer exhibits a **High Churn Risk** with a predicted churn probability of **72.9%**.\n- **Primary Churn Accelerators:** Contract Risk Score (SHAP impact: +0.77), Monthlycharges (SHAP impact: +0.46), Tenure (SHAP impact: +0.44).\n- **Primary Retention Anchors:** Techsupport Yes (SHAP impact: -0.13), Electronic Check Risk (SHAP impact: -0.08).\n\ud83d\udca1 **Recommended Action:** Immediate intervention required. Proactively offer a discounted annual contract lock-in, complimentary tech support, or customized loyalty incentive.",
-            "waterfall_plot_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\shap_waterfall_Price_Sensitive_Senior_Persona.png"
+            "waterfall_plot_path": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\reports\\figures\\shap_waterfall_Price_Sensitive_Senior_Persona.png"
         }
     ]
 }

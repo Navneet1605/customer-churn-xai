@@ -1,5 +1,5 @@
 {
-    "source_file": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\data\\raw\\WA_Fn-UseC_-Telco-Customer-Churn.csv",
+    "source_file": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\data\\raw\\WA_Fn-UseC_-Telco-Customer-Churn.csv",
     "engine": "PyArrow / Pandas",
     "columns": [
         "customerID",
@@ -72,6 +72,6 @@
         "TotalCharges": 11,
         "Churn": 0
     },
-    "hdfs_storage_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\data\\hdfs_simulation\\warehouse\\telco",
-    "output_parquet_path": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\data\\processed\\cleaned_telco.parquet"
+    "hdfs_storage_path": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\data\\hdfs_simulation\\warehouse\\telco",
+    "output_parquet_path": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\data\\processed\\cleaned_telco.parquet"
 }

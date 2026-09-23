@@ -1,6 +1,6 @@
 {
     "best_model_name": "Gradient Boosted Trees",
-    "best_model_file": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\models\\Gradient_Boosted_Trees_pipeline.pkl",
+    "best_model_file": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\models\\Gradient_Boosted_Trees_pipeline.pkl",
     "metrics_summary": [
         {
             "Model": "Logistic Regression",
@@ -39,7 +39,7 @@
         "ROC_AUC": 0.8465,
         "PR_AUC": 0.6639
     },
-    "roc_curve_figure": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\roc_curves_comparison.png",
-    "pr_curve_figure": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\precision_recall_curves.png",
-    "confusion_matrix_figure": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\reports\\figures\\confusion_matrices_comparison.png"
+    "roc_curve_figure": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\reports\\figures\\roc_curves_comparison.png",
+    "pr_curve_figure": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\reports\\figures\\precision_recall_curves.png",
+    "confusion_matrix_figure": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\reports\\figures\\confusion_matrices_comparison.png"
 }

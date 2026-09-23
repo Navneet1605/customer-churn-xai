@@ -14,5 +14,5 @@
     "spark_mllib_results": {
         "SparkMLlib_Note": "Spark MLlib code validated; local fallback executed for rapid SHAP model interop."
     },
-    "models_dir": "C:\\Users\\navne\\.gemini\\antigravity-ide\\scratch\\customer-churn-xai\\models"
+    "models_dir": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\models"
 }
