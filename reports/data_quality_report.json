@@ -7,126 +7,126 @@
     "missing_summary": [
         {
             "Column": "customerID",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 7043
         },
         {
             "Column": "gender",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 2
         },
         {
             "Column": "SeniorCitizen",
-            "DataType": "int64",
+            "DataType": "int32",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 2
         },
         {
             "Column": "Partner",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 2
         },
         {
             "Column": "Dependents",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 2
         },
         {
             "Column": "tenure",
-            "DataType": "int64",
+            "DataType": "int32",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 73
         },
         {
             "Column": "PhoneService",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 2
         },
         {
             "Column": "MultipleLines",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 3
         },
         {
             "Column": "InternetService",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 3
         },
         {
             "Column": "OnlineSecurity",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 3
         },
         {
             "Column": "OnlineBackup",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 3
         },
         {
             "Column": "DeviceProtection",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 3
         },
         {
             "Column": "TechSupport",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 3
         },
         {
             "Column": "StreamingTV",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 3
         },
         {
             "Column": "StreamingMovies",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 3
         },
         {
             "Column": "Contract",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 3
         },
         {
             "Column": "PaperlessBilling",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 2
         },
         {
             "Column": "PaymentMethod",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 4
@@ -147,7 +147,7 @@
         },
         {
             "Column": "Churn",
-            "DataType": "object",
+            "DataType": "str",
             "NullCount": 0,
             "NullPercentage": 0.0,
             "UniqueValues": 2

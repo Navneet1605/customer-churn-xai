@@ -96,6 +96,9 @@ def run_data_ingestion(
         except Exception as write_err:
             logger.warning(f"Native Spark Parquet write fallback: {write_err}")
             # Fallback export via pandas
+            import shutil
+            if out_path.exists() and out_path.is_dir():
+                shutil.rmtree(out_path)
             pdf = df_spark.toPandas()
             pdf.to_parquet(str(out_path), index=False)
             pdf.to_parquet(str(hdfs_path / "telco_data.parquet"), index=False)
