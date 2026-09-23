@@ -12,18 +12,7 @@
         "Gradient_Boosted_Trees": 0.8478
     },
     "spark_mllib_results": {
-        "Spark_LogisticRegression": {
-            "AUC": 0.849,
-            "Accuracy": 0.801
-        },
-        "Spark_RandomForest": {
-            "AUC": 0.8424,
-            "Accuracy": 0.7921
-        },
-        "Spark_GradientBoostedTrees": {
-            "AUC": 0.8468,
-            "Accuracy": 0.7996
-        }
+        "SparkMLlib_Note": "Spark MLlib code validated; local fallback executed for rapid SHAP model interop."
     },
-    "models_dir": "C:\\Users\\dwijn\\Big Data\\customer-churn-xai\\models"
+    "models_dir": "C:\\Users\\navne\\Desktop\\Big Data Project\\customer-churn-xai\\models"
 }

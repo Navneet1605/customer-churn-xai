@@ -14,27 +14,27 @@
 
 | Column | Data Type | Null Count | Null % | Unique Values |
 |---|---|---|---|---|
-| `customerID` | `str` | 0 | 0.0% | 7043 |
-| `gender` | `str` | 0 | 0.0% | 2 |
-| `SeniorCitizen` | `int32` | 0 | 0.0% | 2 |
-| `Partner` | `str` | 0 | 0.0% | 2 |
-| `Dependents` | `str` | 0 | 0.0% | 2 |
-| `tenure` | `int32` | 0 | 0.0% | 73 |
-| `PhoneService` | `str` | 0 | 0.0% | 2 |
-| `MultipleLines` | `str` | 0 | 0.0% | 3 |
-| `InternetService` | `str` | 0 | 0.0% | 3 |
-| `OnlineSecurity` | `str` | 0 | 0.0% | 3 |
-| `OnlineBackup` | `str` | 0 | 0.0% | 3 |
-| `DeviceProtection` | `str` | 0 | 0.0% | 3 |
-| `TechSupport` | `str` | 0 | 0.0% | 3 |
-| `StreamingTV` | `str` | 0 | 0.0% | 3 |
-| `StreamingMovies` | `str` | 0 | 0.0% | 3 |
-| `Contract` | `str` | 0 | 0.0% | 3 |
-| `PaperlessBilling` | `str` | 0 | 0.0% | 2 |
-| `PaymentMethod` | `str` | 0 | 0.0% | 4 |
+| `customerID` | `object` | 0 | 0.0% | 7043 |
+| `gender` | `object` | 0 | 0.0% | 2 |
+| `SeniorCitizen` | `int64` | 0 | 0.0% | 2 |
+| `Partner` | `object` | 0 | 0.0% | 2 |
+| `Dependents` | `object` | 0 | 0.0% | 2 |
+| `tenure` | `int64` | 0 | 0.0% | 73 |
+| `PhoneService` | `object` | 0 | 0.0% | 2 |
+| `MultipleLines` | `object` | 0 | 0.0% | 3 |
+| `InternetService` | `object` | 0 | 0.0% | 3 |
+| `OnlineSecurity` | `object` | 0 | 0.0% | 3 |
+| `OnlineBackup` | `object` | 0 | 0.0% | 3 |
+| `DeviceProtection` | `object` | 0 | 0.0% | 3 |
+| `TechSupport` | `object` | 0 | 0.0% | 3 |
+| `StreamingTV` | `object` | 0 | 0.0% | 3 |
+| `StreamingMovies` | `object` | 0 | 0.0% | 3 |
+| `Contract` | `object` | 0 | 0.0% | 3 |
+| `PaperlessBilling` | `object` | 0 | 0.0% | 2 |
+| `PaymentMethod` | `object` | 0 | 0.0% | 4 |
 | `MonthlyCharges` | `float64` | 0 | 0.0% | 1585 |
 | `TotalCharges` | `float64` | 0 | 0.0% | 6531 |
-| `Churn` | `str` | 0 | 0.0% | 2 |
+| `Churn` | `object` | 0 | 0.0% | 2 |
 | `Churn_Numeric` | `int64` | 0 | 0.0% | 2 |
 
 ---
