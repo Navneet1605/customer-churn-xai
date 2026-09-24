@@ -642,7 +642,7 @@ elif page_selection == "Live Churn Inference & Explainability":
                 paired_shap = list(zip(readable_names, single_shap))
                 top_contributors = sorted(paired_shap, key=lambda x: abs(x[1]), reverse=True)[:8]
                 top_feats_df = pd.DataFrame(top_contributors, columns=["Feature", "SHAP Impact"])
-                top_feats_df["Impact Direction"] = top_feats_df["SHAP Impact"].apply(lambda v: "Positive" if v > 0 else "Negative")
+                top_feats_df["Impact Direction"] = top_feats_df["SHAP Impact"].apply(lambda v: "Positive Churn" if v > 0 else "Negative Churn")
                 
                 fig_shap_bar = px.bar(
                     top_feats_df,
@@ -650,7 +650,7 @@ elif page_selection == "Live Churn Inference & Explainability":
                     y="Feature",
                     orientation='h',
                     color="Impact Direction",
-                    color_discrete_map={"Positive": "#fb7185", "Negative": "#10b981"},
+                    color_discrete_map={"Positive Churn": "#fb7185", "Negative Churn": "#10b981"},
                     template="plotly_dark",
                     height=350
                 )
