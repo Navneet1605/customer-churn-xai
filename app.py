@@ -19,6 +19,16 @@ from typing import Dict, Any, List
 
 warnings.filterwarnings("ignore")
 
+# Backward compatibility shim for pickled scikit-learn objects across versions
+try:
+    import sklearn.compose._column_transformer
+    if not hasattr(sklearn.compose._column_transformer, '_RemainderColsList'):
+        class _RemainderColsList(list):
+            pass
+        sklearn.compose._column_transformer._RemainderColsList = _RemainderColsList
+except Exception:
+    pass
+
 import pandas as pd
 import numpy as np
 import streamlit as st
@@ -1009,6 +1019,15 @@ def load_shap_insights():
 @st.cache_resource
 def load_best_model_and_explainer():
     """Loads champion model pipeline and serialized SHAP explainer."""
+    try:
+        import sklearn.compose._column_transformer
+        if not hasattr(sklearn.compose._column_transformer, '_RemainderColsList'):
+            class _RemainderColsList(list):
+                pass
+            sklearn.compose._column_transformer._RemainderColsList = _RemainderColsList
+    except Exception:
+        pass
+
     model_meta = load_model_evaluation()
     best_file = model_meta.get("best_model_file")
     pipeline = None
@@ -1017,14 +1036,20 @@ def load_best_model_and_explainer():
         if not best_path.is_absolute():
             best_path = BASE_DIR / best_path
         if best_path.exists():
-            with open(best_path, "rb") as f:
-                pipeline = pickle.load(f)
+            try:
+                with open(best_path, "rb") as f:
+                    pipeline = pickle.load(f)
+            except Exception as err:
+                warnings.warn(f"Failed to unpickle champion pipeline: {err}")
 
     explainer_path = BASE_DIR / "models" / "shap_explainer.pkl"
     explainer_obj = None
     if explainer_path.exists():
-        with open(explainer_path, "rb") as f:
-            explainer_obj = pickle.load(f)
+        try:
+            with open(explainer_path, "rb") as f:
+                explainer_obj = pickle.load(f)
+        except Exception as err:
+            warnings.warn(f"Failed to unpickle SHAP explainer: {err}")
 
     return pipeline, explainer_obj
 
