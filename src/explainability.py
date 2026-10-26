@@ -64,11 +64,11 @@ def generate_natural_language_explanation(
         explanation += f"- **Primary Retention Anchors:** {', '.join(neg_desc)}.\n"
         
     if risk_level == "High":
-        explanation += "💡 **Recommended Action:** Immediate intervention required. Proactively offer a discounted annual contract lock-in, complimentary tech support, or customized loyalty incentive."
+        explanation += "**Recommended Action:** Immediate intervention required. Proactively offer a discounted annual contract lock-in, complimentary tech support, or customized loyalty incentive."
     elif risk_level == "Moderate":
-        explanation += "💡 **Recommended Action:** Monitor usage velocity; propose value-add digital security or automated payment discounts."
+        explanation += "**Recommended Action:** Monitor usage velocity; propose value-add digital security or automated payment discounts."
     else:
-        explanation += "💡 **Recommended Action:** High retention health. Consider upselling premium streaming tiers or family bundles."
+        explanation += "**Recommended Action:** High retention health. Consider upselling premium streaming tiers or family bundles."
 
     return explanation
 

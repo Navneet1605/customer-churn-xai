@@ -83,35 +83,35 @@ The SHAP TreeExplainer revealed the primary macroscopic drivers across the entir
 Customer exhibits a **High Churn Risk** with a predicted churn probability of **86.5%**.
 - **Primary Churn Accelerators:** Gender (SHAP impact: +0.93), Multiplelines (SHAP impact: +0.88), Monthlycharges (SHAP impact: +0.27).
 - **Primary Retention Anchors:** Multiplelines No Phone Service (SHAP impact: -0.03), Phoneservice (SHAP impact: -0.01).
-💡 **Recommended Action:** Immediate intervention required. Proactively offer a discounted annual contract lock-in, complimentary tech support, or customized loyalty incentive.
+**Recommended Action:** Immediate intervention required. Proactively offer a discounted annual contract lock-in, complimentary tech support, or customized loyalty incentive.
 
 #### Persona: Moderate Vulnerability Archetype
 - **Predicted Risk:** 49.9% (Retain)
 Customer exhibits a **Moderate Churn Risk** with a predicted churn probability of **49.9%**.
 - **Primary Churn Accelerators:** Multiplelines (SHAP impact: +0.88), Monthlycharges (SHAP impact: +0.41), Gender (SHAP impact: +0.11).
 - **Primary Retention Anchors:** Onlinesecurity No Internet Service (SHAP impact: -0.10), Partner (SHAP impact: -0.09).
-💡 **Recommended Action:** Monitor usage velocity; propose value-add digital security or automated payment discounts.
+**Recommended Action:** Monitor usage velocity; propose value-add digital security or automated payment discounts.
 
 #### Persona: High Retention & Loyal Archetype
 - **Predicted Risk:** 2.2% (Retain)
 Customer exhibits a **Low Churn Risk** with a predicted churn probability of **2.2%**.
 - **Primary Churn Accelerators:** Contract Risk Score (SHAP impact: +0.06), Dependents (SHAP impact: +0.03), Gender Male (SHAP impact: +0.01).
 - **Primary Retention Anchors:** Multiplelines (SHAP impact: -0.79), Gender (SHAP impact: -0.33).
-💡 **Recommended Action:** High retention health. Consider upselling premium streaming tiers or family bundles.
+**Recommended Action:** High retention health. Consider upselling premium streaming tiers or family bundles.
 
 #### Persona: Support-Deficient Tech Consumer
 - **Predicted Risk:** 64.5% (Churn)
 Customer exhibits a **Moderate Churn Risk** with a predicted churn probability of **64.5%**.
 - **Primary Churn Accelerators:** Multiplelines (SHAP impact: +0.84), Monthlycharges (SHAP impact: +0.41), Gender (SHAP impact: +0.25).
 - **Primary Retention Anchors:** Onlinesecurity No Internet Service (SHAP impact: -0.07), Techsupport (SHAP impact: -0.07).
-💡 **Recommended Action:** Monitor usage velocity; propose value-add digital security or automated payment discounts.
+**Recommended Action:** Monitor usage velocity; propose value-add digital security or automated payment discounts.
 
 #### Persona: Price-Sensitive Senior Subscriber
 - **Predicted Risk:** 72.9% (Churn)
 Customer exhibits a **High Churn Risk** with a predicted churn probability of **72.9%**.
 - **Primary Churn Accelerators:** Multiplelines (SHAP impact: +0.78), Partner (SHAP impact: +0.46), Gender (SHAP impact: +0.44).
 - **Primary Retention Anchors:** Gender Male (SHAP impact: -0.13), Onlinesecurity No Internet Service (SHAP impact: -0.06).
-💡 **Recommended Action:** Immediate intervention required. Proactively offer a discounted annual contract lock-in, complimentary tech support, or customized loyalty incentive.
+**Recommended Action:** Immediate intervention required. Proactively offer a discounted annual contract lock-in, complimentary tech support, or customized loyalty incentive.
 
 
 ---

@@ -22,9 +22,14 @@ The system is built to process raw data, train a machine learning model, and pro
    - Global feature importance is calculated to understand macro churn drivers.
    - Local waterfall plots are generated to explain the precise risk factors for individual customers.
 
-5. **Interactive Dashboard:**
-   - A Streamlit web application provides executive KPI cards.
-   - Users can perform live single-customer risk prediction or upload CSVs for batch inference.
+5. **Prescriptive AI & Counterfactual Optimization:**
+   - Algorithmic Minimal Actionable Recourse solves for the lowest-cost intervention that flips high-risk accounts into secure subscribers.
+   - Standardized enterprise action packages model Customer Lifetime Value (CLTV), preserved revenue, and return on retention spend (ROI).
+   - Cohort Resource Allocation Matrix segments subscribers into high-touch, automated, cost-sensitive, and secure quadrants.
+
+6. **Interactive Dashboard:**
+   - A streamlined Streamlit web application with executive KPI cards.
+   - Interactive "What-If" sandbox for live policy simulation, side-by-side pre/post risk gauges, and batch CSV scoring.
 
 ## How to Use
 
