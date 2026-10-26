@@ -2,210 +2,991 @@
 app.py
 ======
 Interactive Streamlit Dashboard for Explainable Customer Churn Prediction
+and Prescriptive Counterfactual Retention Optimization.
+
+Design: Premium Modern Bright Theme with White-to-Peach & Terracotta Gradients,
+Hover-Expandable Sidebar Navigation, High-Contrast Typography, and SHAP Interpretability.
+Zero Emojis.
 """
 
 import os
 import sys
 import json
 import pickle
+import warnings
 from pathlib import Path
+from typing import Dict, Any, List
+
+warnings.filterwarnings("ignore")
+
 import pandas as pd
 import numpy as np
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Append project root to sys.path to allow imports if needed
+# Append project root to sys.path
 BASE_DIR = Path(__file__).resolve().parent
 sys.path.append(str(BASE_DIR))
 
+import base64
+
+def load_asset_b64(filename: str) -> str:
+    path = BASE_DIR / "assets" / filename
+    if not path.exists():
+        path = Path(r"C:\Users\dwijn\Big Data\assets") / filename
+    if path.exists():
+        return base64.b64encode(path.read_bytes()).decode("utf-8")
+    return ""
+
+b64_exec = load_asset_b64("Executive Overview.png")
+b64_intel = load_asset_b64("Customer Intelligence & XAI.png")
+b64_presc = load_asset_b64("Prescriptive AI & Retention.png")
+b64_cohort = load_asset_b64("Portfolio Cohort Matrix.png")
+b64_bench = load_asset_b64("Model Benchmarks & Data.png")
+b64_logo = load_asset_b64("logo_ui.png") or load_asset_b64("logo.png")
+
+from src.prescriptive_engine import (
+    compute_derived_features,
+    simulate_intervention,
+    generate_prescriptive_packages,
+    optimize_minimal_actionable_recourse,
+    analyze_cohort_prescriptive_matrix,
+    classify_retention_quadrant
+)
+
 # Page configuration
 st.set_page_config(
-    page_title="Churn Intelligence",
+    page_title="Churn Intelligence Platform",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Load Custom CSS & Suppress Chrome
+# ---------------------------------------------------------
+# Custom CSS: Modern Bright Light Theme with Terracotta/Peach Palette
+# & Hover-Expandable Sidebar
+# ---------------------------------------------------------
 custom_css = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 /* Suppress default Streamlit chrome */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
 
-/* Base container padding */
-.block-container {
-    padding: 3rem 4rem !important;
-    max-width: 1400px;
-}
-
 /* Global Typography & Colors */
-html, body, [class*="css"] {
-    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif !important;
+html, body, [class*="css"], .stMarkdown, p, div, span, label {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
-:root {
-    --bg-color: #050505;
-    --surface-color: #0a0a0a;
-    --border-color: #1a2e23;
-    --text-primary: #ecfdf5;
-    --text-muted: #a7f3d0;
-    --accent: #10b981;
-    --accent-hover: #34d399;
-    --glow-color: rgba(52, 211, 153, 0.4);
+/* App Background: Warm pearl with subtle peach gradient */
+.stApp {
+    background: linear-gradient(180deg, #fefbf8 0%, #fff7f2 50%, #fef1e8 100%) !important;
+    color: #261914 !important;
 }
 
-/* Hide Sidebar Completely */
-[data-testid="stSidebar"], [data-testid="collapsedControl"] {
+/* Main content container */
+.block-container {
+    padding-top: 1.5rem !important;
+    padding-bottom: 2.5rem !important;
+    padding-left: 2.5rem !important;
+    padding-right: 2.5rem !important;
+    max-width: 1380px;
+}
+
+/* ---------------------------------------------------------
+   Sidebar: Hover Expandable & Minimizable Navigation
+/* ---------------------------------------------------------
+   Sidebar: Layered Overlay Navigation (Zero Layout Shift)
+--------------------------------------------------------- */
+/* Suppress Streamlit's default collapse chevron so sidebar is purely hover-driven */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="collapsedControl"],
+button[data-testid="stSidebarCollapseButton"] {
     display: none !important;
 }
 
-/* Top Navigation Pills */
-.stRadio > div[role="radiogroup"] {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 2rem;
-}
-.stRadio > div[role="radiogroup"] > label {
-    background: var(--surface-color);
-    border: 1px solid var(--border-color);
-    padding: 10px 24px;
-    border-radius: 30px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    margin: 0 !important;
-}
-.stRadio > div[role="radiogroup"] > label:hover {
-    box-shadow: 0 0 15px var(--glow-color);
-    border-color: var(--accent-hover);
-    transform: translateY(-2px);
-    color: var(--text-primary);
-}
-/* Hide the actual radio circle to make it look like a pure button/pill */
-.stRadio > div[role="radiogroup"] label > div:first-child {
-    display: none;
+/* Base fixed sidebar overlay: floats ABOVE the page */
+[data-testid="stSidebar"] {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    width: 74px !important;
+    min-width: 74px !important;
+    max-width: 74px !important;
+    overflow-x: hidden !important;
+    white-space: nowrap !important;
+    transition: width 0.3s cubic-bezier(0.2, 0, 0, 1), min-width 0.3s cubic-bezier(0.2, 0, 0, 1), max-width 0.3s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.3s ease !important;
+    z-index: 999999 !important;
+    background: linear-gradient(180deg, #ffffff 0%, #fff9f5 60%, #fff1e8 100%) !important;
+    border-right: 1px solid #fed8c5 !important;
+    box-shadow: 2px 0 16px rgba(231, 111, 81, 0.08) !important;
 }
 
-/* Metric card styling */
-.metric-card {
-    background: linear-gradient(145deg, #0f1712 0%, #050505 100%);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+/* Expanded state on hover - layers seamlessly above the page without pushing */
+[data-testid="stSidebar"]:hover,
+[data-testid="stSidebar"]:focus-within {
+    width: 320px !important;
+    min-width: 320px !important;
+    max-width: 320px !important;
+    box-shadow: 14px 0 48px rgba(231, 111, 81, 0.22) !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+    width: 320px !important;
+    min-width: 320px !important;
+    overflow-x: hidden !important;
+    padding-top: 1.25rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    box-sizing: border-box !important;
+}
+
+/* Keep the main page in a fixed, non-reactive position: NEVER shifts or reflows on hover */
+[data-testid="stAppViewContainer"] > .main,
+[data-testid="stMain"],
+.main {
+    margin-left: 74px !important;
+    width: calc(100vw - 74px) !important;
+    max-width: calc(100vw - 74px) !important;
+    transition: none !important;
+}
+
+/* ---------------------------------------------------------
+   Sidebar Minimized vs Hover Visibility Rules
+--------------------------------------------------------- */
+/* When sidebar is minimized: hide text, show only symbols */
+[data-testid="stSidebar"]:not(:hover) .sidebar-brand-text {
+    display: none !important;
+}
+
+[data-testid="stSidebar"]:not(:hover) [data-testid="stRadio"] [data-testid="stMarkdownContainer"] {
+    display: none !important;
+}
+
+[data-testid="stSidebar"]:not(:hover) .sidebar-telemetry {
+    display: none !important;
+}
+
+/* When sidebar is hovered: smoothly reveal text */
+[data-testid="stSidebar"]:hover .sidebar-brand-text {
+    display: block !important;
+    animation: fadeInText 0.22s ease;
+}
+
+[data-testid="stSidebar"]:hover [data-testid="stRadio"] [data-testid="stMarkdownContainer"] {
+    display: block !important;
+    animation: fadeInText 0.22s ease;
+    margin-left: 10px !important;
+}
+
+[data-testid="stSidebar"]:hover .sidebar-telemetry {
+    display: block !important;
+    animation: fadeInText 0.25s ease;
+}
+
+@keyframes fadeInText {
+    from { opacity: 0; transform: translateX(-6px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* ---------------------------------------------------------
+   Sidebar Radio Navigation: Symbols & Luxury Item Cards
+--------------------------------------------------------- */
+/* Force rich dark charcoal typography */
+[data-testid="stSidebar"] [data-testid="stRadio"],
+[data-testid="stSidebar"] [data-testid="stRadio"] div,
+[data-testid="stSidebar"] [data-testid="stRadio"] label,
+[data-testid="stSidebar"] [data-testid="stRadio"] p,
+[data-testid="stSidebar"] [data-testid="stRadio"] span,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stSidebar"] div[role="radiogroup"] label p,
+[data-testid="stSidebar"] div[role="radiogroup"] label span {
+    color: #1a120e !important;
+    -webkit-text-fill-color: #1a120e !important;
+    font-weight: 700 !important;
+    font-size: 0.94rem !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+[data-testid="stSidebar"] div[role="radiogroup"] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-top: 0.5rem !important;
+}
+
+/* ---------------------------------------------------------
+   Completely remove default Streamlit radio circles & dots
+--------------------------------------------------------- */
+[data-testid="stSidebar"] [data-testid="stRadio"] [data-testid="stRadioOption"] > div > div:first-child,
+[data-testid="stSidebar"] [data-testid="stRadio"] div[class*="e1mpz0hj4"],
+[data-testid="stSidebar"] [data-testid="stRadio"] div[class*="e1mpz0hj5"],
+[data-testid="stSidebar"] [data-testid="stRadio"] input[type="radio"],
+[data-testid="stSidebar"] [data-testid="stRadio"] label > div:first-child:not([data-testid="stRadioOption"]),
+[data-testid="stSidebar"] [data-testid="stRadio"] [data-baseweb="radio"] > div:first-child {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Radio Option Card Base */
+[data-testid="stSidebar"] div[role="radiogroup"] label {
+    background: #ffffff !important;
+    border: 1px solid #f6ded2 !important;
+    border-radius: 12px !important;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    box-shadow: 0 1px 4px rgba(231, 111, 81, 0.04) !important;
+    min-height: 48px !important;
+    box-sizing: border-box !important;
+}
+
+/* When minimized: option wrappers and cards are 48px square showing ONLY the symbol */
+[data-testid="stSidebar"]:not(:hover) div[role="radiogroup"] > * {
+    width: 48px !important;
+    max-width: 48px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+}
+
+[data-testid="stSidebar"]:not(:hover) div[role="radiogroup"] label {
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    height: 48px !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    justify-content: center !important;
+    align-items: center !important;
+    overflow: hidden !important;
+}
+
+/* When minimized: hide ONLY the text label, keeping the symbol badge fully visible */
+[data-testid="stSidebar"]:not(:hover) [data-testid="stRadio"] [data-testid="stMarkdownContainer"] {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* When hovered: card expands to full width with comfortable padding */
+[data-testid="stSidebar"]:hover div[role="radiogroup"] > * {
+    width: 100% !important;
+}
+
+[data-testid="stSidebar"]:hover div[role="radiogroup"] label {
+    width: 100% !important;
+    padding: 6px 12px !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+}
+
+/* When hovered: show the text container right next to the symbol */
+[data-testid="stSidebar"]:hover [data-testid="stRadio"] [data-testid="stMarkdownContainer"] {
+    display: block !important;
+    visibility: visible !important;
+    animation: fadeInText 0.22s ease !important;
+    margin-left: 10px !important;
+}
+
+/* Illustrated Symbol Badge for each page item */
+[data-testid="stSidebar"] div[role="radiogroup"] label::before {
+    content: '' !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid #f2dbcf !important;
+    flex-shrink: 0 !important;
+    transition: all 0.2s ease !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 32px 32px !important;
+    box-shadow: 0 1px 4px rgba(231, 111, 81, 0.06) !important;
+}
+
+/* Card hover glow */
+[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+    background: #fff4ed !important;
+    border-color: #f4a261 !important;
+    transform: translateX(3px) !important;
+    box-shadow: 0 4px 14px rgba(231, 111, 81, 0.14) !important;
+}
+
+[data-testid="stSidebar"] div[role="radiogroup"] label:hover::before {
+    border-color: #f4a261 !important;
+    box-shadow: 0 2px 8px rgba(244, 162, 97, 0.25) !important;
+}
+
+[data-testid="stSidebar"] div[role="radiogroup"] label:hover p,
+[data-testid="stSidebar"] div[role="radiogroup"] label:hover span {
+    color: #e76f51 !important;
+    -webkit-text-fill-color: #e76f51 !important;
+}
+
+/* Active Selected Radio Item */
+[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
+    background: linear-gradient(135deg, #fff2eb 0%, #ffe6d9 100%) !important;
+    border-color: #e76f51 !important;
+    box-shadow: 0 4px 16px rgba(231, 111, 81, 0.2) !important;
+}
+
+[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)::before {
+    background-color: #ffffff !important;
+    border: 2px solid #e76f51 !important;
+    box-shadow: 0 2px 10px rgba(231, 111, 81, 0.3) !important;
+    transform: scale(1.04) !important;
+}
+
+[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p,
+[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) span {
+    color: #b72a00 !important;
+    -webkit-text-fill-color: #b72a00 !important;
+    font-weight: 800 !important;
+}
+
+/* ---------------------------------------------------------
+   Widget Styling: High-contrast light inputs & labels
+--------------------------------------------------------- */
+label[data-testid="stWidgetLabel"] p,
+label[data-testid="stWidgetLabel"] span,
+label[data-testid="stWidgetLabel"],
+.stSelectbox label p,
+.stSlider label p,
+.stMultiSelect label p,
+.stTextInput label p,
+.stFileUploader label p {
+    color: #261914 !important;
+    font-weight: 700 !important;
+    font-size: 0.92rem !important;
+}
+
+div[data-baseweb="select"] > div,
+div[data-baseweb="select"] {
+    background-color: #ffffff !important;
+    border: 1px solid #eeddd4 !important;
+    border-radius: 10px !important;
+}
+
+div[data-baseweb="select"] * {
+    color: #261914 !important;
+    background-color: transparent !important;
+}
+
+div[data-baseweb="select"]:hover > div,
+div[data-baseweb="select"]:focus-within > div {
+    border-color: #e76f51 !important;
+    box-shadow: 0 0 0 3px rgba(231, 111, 81, 0.16) !important;
+}
+
+div[data-baseweb="popover"],
+div[data-baseweb="menu"],
+ul[data-baseweb="menu"] {
+    background-color: #ffffff !important;
+    border: 1px solid #f6ded2 !important;
+    box-shadow: 0 8px 28px rgba(231, 111, 81, 0.14) !important;
+    border-radius: 10px !important;
+}
+
+li[data-baseweb="menu-item"] {
+    color: #261914 !important;
+    font-weight: 500 !important;
+}
+
+li[data-baseweb="menu-item"]:hover {
+    background-color: #fff2eb !important;
+    color: #e76f51 !important;
+}
+
+/* ---------------------------------------------------------
+   Slider Variety: Multi-color Palettes from User Swatches
+--------------------------------------------------------- */
+.stSlider div[data-baseweb="slider"] div[role="slider"] {
+    border: 2px solid #ffffff !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+.stSlider div[data-baseweb="slider"] div[role="slider"]:hover {
+    transform: scale(1.18) !important;
+}
+
+/* Monthly Charges Slider: Golden Apricot / Amber */
+.stSlider:has([aria-label*="Monthly Charges"]) div[data-baseweb="slider"] div[role="slider"],
+.stSlider:nth-of-type(1) div[data-baseweb="slider"] div[role="slider"] {
+    background-color: #f4a261 !important;
+    box-shadow: 0 2px 10px rgba(244, 162, 97, 0.5) !important;
+}
+.stSlider:has([aria-label*="Monthly Charges"]) div[data-baseweb="slider"] > div > div:nth-child(1),
+.stSlider:nth-of-type(1) div[data-baseweb="slider"] > div > div:nth-child(1) {
+    background: #f4a261 !important;
+}
+.stSlider:has([aria-label*="Monthly Charges"]) [data-testid="stThumbValue"],
+.stSlider:nth-of-type(1) [data-testid="stThumbValue"] {
+    color: #d97706 !important;
+    font-weight: 700 !important;
+}
+
+/* Account Tenure Slider: Eucalyptus / Sage Teal */
+.stSlider:has([aria-label*="Tenure"]) div[data-baseweb="slider"] div[role="slider"],
+.stSlider:nth-of-type(2) div[data-baseweb="slider"] div[role="slider"] {
+    background-color: #2a9d8f !important;
+    box-shadow: 0 2px 10px rgba(42, 157, 143, 0.5) !important;
+}
+.stSlider:has([aria-label*="Tenure"]) div[data-baseweb="slider"] > div > div:nth-child(1),
+.stSlider:nth-of-type(2) div[data-baseweb="slider"] > div > div:nth-child(1) {
+    background: #2a9d8f !important;
+}
+.stSlider:has([aria-label*="Tenure"]) [data-testid="stThumbValue"],
+.stSlider:nth-of-type(2) [data-testid="stThumbValue"] {
+    color: #2a9d8f !important;
+    font-weight: 700 !important;
+}
+
+/* Target Safety Threshold Slider: Fresh Emerald Mint */
+.stSlider:has([aria-label*="Threshold"]) div[data-baseweb="slider"] div[role="slider"] {
+    background-color: #0da371 !important;
+    box-shadow: 0 2px 10px rgba(13, 163, 113, 0.5) !important;
+}
+.stSlider:has([aria-label*="Threshold"]) div[data-baseweb="slider"] > div > div:nth-child(1) {
+    background: #0da371 !important;
+}
+.stSlider:has([aria-label*="Threshold"]) [data-testid="stThumbValue"] {
+    color: #0da371 !important;
+    font-weight: 700 !important;
+}
+
+/* Loyalty Discount Slider: Warm Coral Terracotta */
+.stSlider:has([aria-label*="Discount"]) div[data-baseweb="slider"] div[role="slider"] {
+    background-color: #ff6b4a !important;
+    box-shadow: 0 2px 10px rgba(255, 107, 74, 0.5) !important;
+}
+.stSlider:has([aria-label*="Discount"]) div[data-baseweb="slider"] > div > div:nth-child(1) {
+    background: #ff6b4a !important;
+}
+.stSlider:has([aria-label*="Discount"]) [data-testid="stThumbValue"] {
+    color: #d84315 !important;
+    font-weight: 700 !important;
+}
+
+.stSlider div[data-baseweb="slider"] div[data-testid="stTickBar"] > div {
+    background-color: #fed8c5 !important;
+}
+
+.stButton > button {
+    background: linear-gradient(135deg, #e76f51 0%, #d85c3e 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 0.55rem 1.4rem !important;
+    box-shadow: 0 4px 14px rgba(231, 111, 81, 0.25) !important;
+    transition: all 0.2s ease !important;
+}
+
+.stButton > button:hover {
+    background: linear-gradient(135deg, #f4a261 0%, #e76f51 100%) !important;
+    box-shadow: 0 6px 20px rgba(231, 111, 81, 0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ---------------------------------------------------------
+   Cards & Content Components
+--------------------------------------------------------- */
+.card-hero-peach {
+    position: relative;
+    background: linear-gradient(135deg, #ffffff 0%, #fff5ee 55%, #ffebe0 100%);
+    border: 1px solid #fed8c5;
+    border-radius: 16px;
+    padding: 1.4rem 1.75rem;
+    box-shadow: 0 6px 24px rgba(231, 111, 81, 0.08);
+    margin-bottom: 1.25rem;
+}
+
+/* ---------------------------------------------------------
+   Top Right Floating Info Pill & Layered Dialogue Box
+--------------------------------------------------------- */
+.page-info-container {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.4rem;
+    z-index: 9999;
+}
+
+.page-info-details {
+    position: relative;
+    display: inline-block;
+}
+
+/* Remove default disclosure triangle markers */
+.page-info-details summary {
+    list-style: none !important;
+    outline: none !important;
+    cursor: pointer !important;
+}
+
+.page-info-details summary::-webkit-details-marker,
+.page-info-details summary::marker {
+    display: none !important;
+}
+
+/* Very Small, Clean Info Pill Badge */
+.page-info-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    height: 27px !important;
+    padding: 0 0.65rem !important;
+    background: #ffffff !important;
+    border: 1.5px solid #fed8c5 !important;
+    border-radius: 9999px !important;
+    color: #e76f51 !important;
+    font-size: 0.74rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em !important;
+    box-shadow: 0 2px 6px rgba(231, 111, 81, 0.08) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    user-select: none !important;
+}
+
+.page-info-pill:hover,
+.page-info-details[open] .page-info-pill {
+    background: #fff4ec !important;
+    border-color: #e76f51 !important;
+    color: #b72a00 !important;
+    box-shadow: 0 3px 12px rgba(231, 111, 81, 0.2) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* The Layered Dialogue Box (Floats directly above page content) */
+.page-info-dialog {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 440px;
+    max-width: min(440px, 86vw);
+    background: #ffffff;
+    border: 1.5px solid #fed8c5;
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+    box-shadow: 0 16px 48px rgba(231, 111, 81, 0.20), 0 4px 14px rgba(0, 0, 0, 0.05);
+    z-index: 999999;
+    text-align: left;
+    cursor: default;
+    box-sizing: border-box;
+}
+
+/* Invisible bridge so mouse hover doesn't flicker between pill and dialog */
+.page-info-dialog::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    height: 10px;
+}
+
+/* Show dialogue box on hover OR when clicked/open */
+.page-info-details:hover .page-info-dialog,
+.page-info-details[open] .page-info-dialog {
+    display: block !important;
+    animation: fadeInDialog 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInDialog {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.info-section-peach {
+    background: #fff8f4;
+    border: 1px solid #fed8c5;
+    border-radius: 9px;
+    padding: 0.7rem 0.85rem;
+    margin-bottom: 0.65rem;
+}
+
+.info-section-white {
+    background: #ffffff;
+    border: 1px solid #f6ded2;
+    border-radius: 9px;
+    padding: 0.7rem 0.85rem;
+    margin-bottom: 0.65rem;
+}
+
+.info-section-title {
+    color: #d84315;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 0.28rem;
+}
+
+.info-section-title-dark {
+    color: #261914;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 0.32rem;
+}
+
+.info-section-body {
+    font-size: 0.82rem;
+    color: #3b2c25;
+    line-height: 1.45;
+}
+
+.info-bullet-list {
+    font-size: 0.82rem;
+    color: #5a4840;
+    margin: 0;
+    padding-left: 1.15rem;
+    line-height: 1.45;
+}
+
+.info-bullet-list li {
+    margin-bottom: 0.35rem;
+}
+
+.info-bullet-list li:last-child {
+    margin-bottom: 0;
+}
+
+.info-action-protocol {
+    border-top: 1px dashed #fed8c5;
+    padding-top: 0.45rem;
+    font-size: 0.8rem;
+    color: #6d5b52;
+}
+
+.metric-card-peach {
+    background: #ffffff;
+    border: 1px solid #f6ded2;
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    box-shadow: 0 2px 10px rgba(231, 111, 81, 0.04);
+    transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
-
-.metric-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 0 20px var(--glow-color);
-    border-color: var(--accent-hover);
+.metric-card-peach:hover {
+    transform: translateY(-2px);
+    border-color: #e76f51;
+    box-shadow: 0 8px 24px rgba(231, 111, 81, 0.16);
 }
 
-.metric-title {
-    font-size: 0.85rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    margin-bottom: 0.75rem;
-}
-
-.metric-value {
-    font-size: 2.25rem;
+.metric-label {
+    font-size: 0.75rem;
     font-weight: 700;
-    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #8c786e;
+    margin-bottom: 0.3rem;
+}
+.metric-value-peach {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1a120e;
     line-height: 1.1;
+    letter-spacing: -0.02em;
 }
 
-/* Input Widgets Override */
-div[data-baseweb="select"] > div {
-    background-color: var(--bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-div[data-baseweb="select"]:hover > div, div[data-baseweb="select"] > div:focus-within {
-    border-color: var(--accent-hover);
-    box-shadow: 0 0 15px var(--glow-color);
-}
-.stSlider div[data-baseweb="slider"] div[role="slider"] {
-    background-color: var(--text-primary);
-}
-.stSlider div[data-baseweb="slider"] div[data-testid="stTickBar"] > div {
-    background-color: var(--accent);
-}
-
-/* Content Blocks & Callouts */
-.insight-box {
-    background: rgba(16, 185, 129, 0.15);
-    border-left: 3px solid var(--accent-hover);
+/* Status Badges */
+.badge-soft {
+    display: inline-block;
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 3px 8px;
     border-radius: 6px;
-    padding: 1.5rem;
-    margin: 1.5rem 0;
-    color: var(--text-primary);
-    font-weight: 300;
-    line-height: 1.6;
+    margin-top: 0.35rem;
     letter-spacing: 0.02em;
 }
+.badge-coral {
+    background: #fff0eb;
+    color: #d84315;
+    border: 1px solid #ffd4c4;
+}
+.badge-emerald {
+    background: #ecfdf5;
+    color: #2a9d8f;
+    border: 1px solid #a7f3d0;
+}
+.badge-amber {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+.badge-blue {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
 
-/* Tabs */
+.insight-callout-peach {
+    background: linear-gradient(135deg, #fff7f2 0%, #ffefe5 100%);
+    border-left: 4px solid #e76f51;
+    border-top: 1px solid #fee3d5;
+    border-right: 1px solid #fee3d5;
+    border-bottom: 1px solid #fee3d5;
+    border-radius: 10px;
+    padding: 1.15rem 1.4rem;
+    margin: 1.15rem 0;
+    color: #3b2c25;
+    line-height: 1.6;
+    font-size: 0.92rem;
+}
+
+.package-card {
+    background: #ffffff;
+    border: 1px solid #f6ded2;
+    border-radius: 14px;
+    padding: 1.35rem;
+    box-shadow: 0 4px 18px rgba(231, 111, 81, 0.05);
+    transition: all 0.2s ease;
+    height: 100%;
+}
+.package-card:hover {
+    border-color: #e76f51;
+    box-shadow: 0 10px 30px rgba(231, 111, 81, 0.16);
+    transform: translateY(-2px);
+}
+
 .stTabs [data-baseweb="tab-list"] {
-    gap: 2rem;
-    border-bottom: 1px solid var(--border-color);
+    gap: 1.5rem;
+    border-bottom: 2px solid #f6ded2;
 }
 .stTabs [data-baseweb="tab"] {
-    padding-bottom: 1rem;
-    color: var(--text-muted);
-    font-weight: 500;
+    padding-bottom: 0.75rem;
+    color: #8c786e;
+    font-weight: 600;
 }
 .stTabs [aria-selected="true"] {
-    color: var(--text-primary) !important;
-    border-bottom: 2px solid var(--text-primary) !important;
+    color: #d84315 !important;
+    border-bottom: 2px solid #e76f51 !important;
 }
 
-/* Dataframes */
 [data-testid="stDataFrame"] {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border: 1px solid #f6ded2;
+    border-radius: 12px;
     overflow: hidden;
+    background: #ffffff;
 }
 
-/* Titles and Headers */
 h1 {
+    font-weight: 800 !important;
+    letter-spacing: -0.03em;
+    color: #1a120e !important;
+    margin-bottom: 0.5rem !important;
+}
+h2 {
     font-weight: 700 !important;
     letter-spacing: -0.02em;
-    margin-bottom: 2rem !important;
-    color: #ffffff;
+    color: #261914 !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 1rem !important;
 }
-h2, h3 {
+h3 {
+    font-weight: 700 !important;
+    color: #3b2c25 !important;
+    margin-bottom: 0.75rem !important;
+}
+h4 {
     font-weight: 600 !important;
-    letter-spacing: -0.01em;
-    color: #e2e8f0;
+    color: #4a3b34 !important;
 }
 </style>
 """
+
+icons_css = f"""
+<style>
+/* Option 1: Executive Overview */
+[data-testid="stSidebar"] div[role="radiogroup"] > *:nth-child(1) label::before,
+[data-testid="stSidebar"] [data-testid="stRadioGroup"] > *:nth-child(1) label::before,
+[data-testid="stSidebar"] label:has(input[value="0"])::before {{
+    background-image: url('data:image/png;base64,{b64_exec}') !important;
+}}
+
+/* Option 2: Customer Intelligence & XAI */
+[data-testid="stSidebar"] div[role="radiogroup"] > *:nth-child(2) label::before,
+[data-testid="stSidebar"] [data-testid="stRadioGroup"] > *:nth-child(2) label::before,
+[data-testid="stSidebar"] label:has(input[value="1"])::before {{
+    background-image: url('data:image/png;base64,{b64_intel}') !important;
+}}
+
+/* Option 3: Prescriptive AI & Retention */
+[data-testid="stSidebar"] div[role="radiogroup"] > *:nth-child(3) label::before,
+[data-testid="stSidebar"] [data-testid="stRadioGroup"] > *:nth-child(3) label::before,
+[data-testid="stSidebar"] label:has(input[value="2"])::before {{
+    background-image: url('data:image/png;base64,{b64_presc}') !important;
+}}
+
+/* Option 4: Portfolio Cohort Matrix */
+[data-testid="stSidebar"] div[role="radiogroup"] > *:nth-child(4) label::before,
+[data-testid="stSidebar"] [data-testid="stRadioGroup"] > *:nth-child(4) label::before,
+[data-testid="stSidebar"] label:has(input[value="3"])::before {{
+    background-image: url('data:image/png;base64,{b64_cohort}') !important;
+}}
+
+/* Option 5: Model Benchmarks & Data */
+[data-testid="stSidebar"] div[role="radiogroup"] > *:nth-child(5) label::before,
+[data-testid="stSidebar"] [data-testid="stRadioGroup"] > *:nth-child(5) label::before,
+[data-testid="stSidebar"] label:has(input[value="4"])::before {{
+    background-image: url('data:image/png;base64,{b64_bench}') !important;
+}}
+</style>
+"""
+
 st.markdown(custom_css, unsafe_allow_html=True)
+st.markdown(icons_css, unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------
-# Helper Data Loaders (Cached for high performance)
+# Helper Functions: Safe HTML Rendering
+# ---------------------------------------------------------
+def render_html(html_str: str) -> None:
+    """Safely renders HTML without markdown parser treating leading indentation as code blocks."""
+    cleaned = "\n".join(line.strip() for line in html_str.strip().splitlines())
+    st.markdown(cleaned, unsafe_allow_html=True)
+
+
+def render_metric_card(
+    title: str,
+    value: str,
+    subtitle: str = "",
+    badge_text: str = "",
+    badge_type: str = "coral"
+) -> str:
+    sub_html = f'<div style="font-size: 0.8rem; color: #7c6a60; margin-top: 0.35rem;">{subtitle}</div>' if subtitle else ""
+    badge_html = f'<div class="badge-soft badge-{badge_type}">{badge_text}</div>' if badge_text else ""
+    return f"""
+    <div class="metric-card-peach">
+        <div class="metric-label">{title}</div>
+        <div class="metric-value-peach">{value}</div>
+        {badge_html}
+        {sub_html}
+    </div>
+    """
+
+
+def render_page_header_with_info(
+    page_title: str,
+    category_subtitle: str,
+    description: str,
+    purpose: str,
+    what_it_tells: List[str],
+    how_it_works: str,
+    action_protocol: str
+) -> None:
+    list_items_html = "".join([f"<li>{item}</li>" for item in what_it_tells])
+    
+    render_html(f"""
+    <div class="card-hero-peach" style="margin-bottom: 1.25rem;">
+        <div class="page-info-container">
+            <details class="page-info-details">
+                <summary class="page-info-pill" title="Page Information & Guide">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span>Info</span>
+                </summary>
+                
+                <div class="page-info-dialog">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
+                        <div style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #e76f51;">
+                            Platform Documentation
+                        </div>
+                        <div style="font-size: 0.72rem; color: #a89288; font-weight: 500;">
+                            Hover or click to pin
+                        </div>
+                    </div>
+                    <h3 style="margin: 0 0 0.75rem 0; font-size: 1.1rem; color: #1a120e; font-weight: 800; letter-spacing: -0.02em;">
+                        {page_title}
+                    </h3>
+                    
+                    <div class="info-section-peach">
+                        <strong class="info-section-title">Core Purpose & Scope</strong>
+                        <div class="info-section-body">{purpose}</div>
+                    </div>
+
+                    <div class="info-section-white">
+                        <strong class="info-section-title-dark">Information Provided</strong>
+                        <ul class="info-bullet-list">
+                            {list_items_html}
+                        </ul>
+                    </div>
+
+                    <div class="info-section-white" style="margin-bottom: 0;">
+                        <strong class="info-section-title-dark">Methodology & Operational Protocol</strong>
+                        <div class="info-section-body" style="margin-bottom: 0.45rem;">{how_it_works}</div>
+                        <div class="info-action-protocol">
+                            <strong style="color: #0da371;">Action Protocol:</strong> {action_protocol}
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <div style="padding-right: 85px;">
+            <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e76f51; margin-bottom: 0.35rem;">
+                {category_subtitle}
+            </div>
+            <h1 style="font-size: 2.15rem; margin: 0; color: #1a120e; letter-spacing: -0.025em; line-height: 1.2;">
+                {page_title}
+            </h1>
+            <p style="color: #6d5a52; font-size: 0.96rem; margin-top: 0.45rem; line-height: 1.5; margin-bottom: 0;">
+                {description}
+            </p>
+        </div>
+    </div>
+    """)
+
+
+# ---------------------------------------------------------
+# Cached Data Loaders
 # ---------------------------------------------------------
 @st.cache_data
 def load_eda_insights():
     p = BASE_DIR / "reports" / "eda_and_business_insights.json"
     if p.exists():
-        with open(p, "r") as f:
+        with open(p, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
 
@@ -213,7 +994,7 @@ def load_eda_insights():
 def load_model_evaluation():
     p = BASE_DIR / "reports" / "model_evaluation_metrics.json"
     if p.exists():
-        with open(p, "r") as f:
+        with open(p, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
 
@@ -221,7 +1002,7 @@ def load_model_evaluation():
 def load_shap_insights():
     p = BASE_DIR / "reports" / "shap_explanations.json"
     if p.exists():
-        with open(p, "r") as f:
+        with open(p, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
 
@@ -232,10 +1013,9 @@ def load_best_model_and_explainer():
     best_file = model_meta.get("best_model_file")
     pipeline = None
     if best_file:
-        # best_file paths in json are relative to customer-churn-xai, so we can use BASE_DIR
         best_path = Path(best_file)
         if not best_path.is_absolute():
-             best_path = BASE_DIR / best_path
+            best_path = BASE_DIR / best_path
         if best_path.exists():
             with open(best_path, "rb") as f:
                 pipeline = pickle.load(f)
@@ -259,7 +1039,7 @@ def load_processed_sample_data():
     return pd.DataFrame()
 
 
-# Load datasets & artifacts
+# Load artifacts
 eda_data = load_eda_insights()
 model_eval = load_model_evaluation()
 shap_data = load_shap_insights()
@@ -268,482 +1048,1084 @@ df_sample = load_processed_sample_data()
 
 
 # ---------------------------------------------------------
-# Top Navigation
+# Sidebar Navigation & Hover System Telemetry
 # ---------------------------------------------------------
-st.markdown(
-    """
-    <div style="text-align: center; margin-bottom: 2rem;">
-        <h1 style="margin-bottom: 0 !important; color: var(--accent); font-size: 3rem;">Churn Intelligence</h1>
-        <p style="color: var(--text-muted); font-size: 1.1rem; letter-spacing: 0.05em;">Distributed Pipeline and Model Explainability</p>
+with st.sidebar:
+    render_html(f"""
+    <div style="display: flex; align-items: center; gap: 12px; padding: 0.25rem 0 1.25rem 0; border-bottom: 1px solid #f6ded2; margin-bottom: 1.25rem;">
+        <div style="min-width: 48px; width: 48px; height: 48px; border-radius: 12px; background: #ffffff; border: 1.5px solid #fed8c5; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(231, 111, 81, 0.14); flex-shrink: 0; padding: 2px; box-sizing: border-box;">
+            <img src="data:image/png;base64,{b64_logo}" style="width: 42px; height: 42px; object-fit: contain;" alt="Logo" />
+        </div>
+        <div class="sidebar-brand-text" style="overflow: hidden; white-space: nowrap;">
+            <div style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #e76f51; line-height: 1.2;">
+                Enterprise Intelligence
+            </div>
+            <h2 style="font-size: 1.25rem; font-weight: 800; color: #1e1713; margin: 0; letter-spacing: -0.02em; line-height: 1.25;">
+                Churn Intelligence
+            </h2>
+            <div style="display: inline-block; background: #fff2eb; border: 1px solid #fed8c5; border-radius: 5px; padding: 1px 6px; font-size: 0.7rem; font-weight: 700; color: #d84315; margin-top: 0.25rem;">
+                PySpark &bull; XAI &bull; Recourse
+            </div>
+        </div>
     </div>
-    """, unsafe_allow_html=True
-)
+    """)
 
-page_selection = st.radio(
-    "Navigation",
-    [
-        "Executive Overview",
-        "Data Overview & Schema",
-        "Exploratory Analytics",
-        "Model Performance & ROC",
-        "Live Churn Inference & Explainability",
-        "Batch Prediction",
-        "Strategic Insights & Reports"
-    ],
-    horizontal=True,
-    label_visibility="collapsed"
-)
+    page_selection = st.radio(
+        "Navigation",
+        [
+            "Executive Overview",
+            "Customer Intelligence & XAI",
+            "Prescriptive AI & Retention",
+            "Portfolio Cohort Matrix",
+            "Model Benchmarks & Data"
+        ],
+        label_visibility="collapsed"
+    )
+
+    render_html("""
+    <div class="sidebar-telemetry" style="margin-top: 2rem; padding: 1.15rem; background: #ffffff; border: 1px solid #f6ded2; border-radius: 12px; box-shadow: 0 4px 14px rgba(231, 111, 81, 0.05);">
+        <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #8e7a70; margin-bottom: 0.5rem;">
+            System Telemetry
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
+            <span style="color: #6d5b52;">Active Accounts:</span>
+            <strong style="color: #1e1713;">7,043</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
+            <span style="color: #6d5b52;">Storage Architecture:</span>
+            <strong style="color: #2a9d8f;">HDFS Parquet</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+            <span style="color: #6d5b52;">Champion ROC-AUC:</span>
+            <strong style="color: #e76f51;">0.8464</strong>
+        </div>
+    </div>
+    """)
 
 
 # =========================================================
 # PAGE 1: Executive Overview
 # =========================================================
 if page_selection == "Executive Overview":
-    st.title("Executive Overview")
-    st.subheader("High-Level Churn Metrics")
-    
+    render_page_header_with_info(
+        page_title="Executive Overview & Revenue Exposure",
+        category_subtitle="Enterprise Telemetry & Strategic Briefing",
+        description="High-throughput analytics monitoring subscriber health across 7,043 enterprise accounts. Identifies annualized revenue at risk and operational churn catalysts before cancellation occurs.",
+        purpose="Monitors macroscopic portfolio health, quantifies bottom-line financial exposure, and uncovers institutional churn catalysts across the entire contracted subscriber base.",
+        what_it_tells=[
+            "Total active contracted accounts (7,043) and portfolio baseline churn rate (26.54%).",
+            "Monthly recurring revenue exposed to churn ($139,130/mo, representing 30.5% of gross revenue).",
+            "Distribution of risk across contract types, tenure velocity, payment methods, and internet infrastructure.",
+            "Production champion model validation performance (ROC-AUC 0.8464)."
+        ],
+        how_it_works="Aggregates verified enterprise telemetry and cross-validated PySpark MLlib inferences across all customer accounts. Evaluates feature correlations against historical attrition benchmarks to surface early warning indicators.",
+        action_protocol="Mandate contract extension incentives for accounts in months 1-12, initiate billing migration away from electronic checks, and prioritize fiber-optic service stability audits."
+    )
+
     kpis = eda_data.get("kpis", {})
-    
+    best_auc = model_eval.get("best_metrics", {}).get("ROC_AUC", 0.8464)
+
+    # 4 Top Metric Cards
     col1, col2, col3, col4 = st.columns(4)
-    
-    def metric_card(title, value):
-        return f'<div class="metric-card"><div class="metric-title">{title}</div><div class="metric-value">{value}</div></div>'
-        
     with col1:
-        st.markdown(metric_card("Total Customer Base", f"{kpis.get('total_customers', 7043):,}"), unsafe_allow_html=True)
+        render_html(render_metric_card(
+            "Total Subscriber Base",
+            f"{kpis.get('total_customers', 7043):,}",
+            "Active contracted accounts",
+            badge_text="Monitored",
+            badge_type="blue"
+        ))
     with col2:
-        st.markdown(metric_card("Baseline Churn Rate", f"{kpis.get('churn_rate_pct', 26.54):.2f}%"), unsafe_allow_html=True)
+        render_html(render_metric_card(
+            "Baseline Churn Rate",
+            f"{kpis.get('churn_rate_pct', 26.54):.2f}%",
+            "Unmanaged annual attrition",
+            badge_text="Benchmark",
+            badge_type="amber"
+        ))
     with col3:
-        st.markdown(metric_card("Monthly Revenue at Risk", f"${kpis.get('monthly_revenue_at_risk', 139130):,.0f}"), unsafe_allow_html=True)
+        render_html(render_metric_card(
+            "Monthly Revenue at Risk",
+            f"${kpis.get('monthly_revenue_at_risk', 139130):,.0f}",
+            "30.5% of total gross revenue",
+            badge_text="Exposure",
+            badge_type="coral"
+        ))
     with col4:
-        best_auc = model_eval.get("best_metrics", {}).get("ROC_AUC", 0.8465)
-        st.markdown(metric_card("Champion Model AUC", f"{best_auc:.4f}"), unsafe_allow_html=True)
-
-    st.markdown("<br><br>", unsafe_allow_html=True)
-
-    with st.container():
-        st.subheader("Architectural Flow")
-        st.markdown(
-            """
-            <div class="insight-box" style="font-family: monospace; font-size: 0.95rem; text-align: center; font-weight: 500;">
-                Data Ingestion (HDFS/Parquet) &nbsp;➔&nbsp; PySpark Preprocessing &nbsp;➔&nbsp; Spark MLlib (LR, RF, GBT) &nbsp;➔&nbsp; SHAP Interpretation &nbsp;➔&nbsp; Decision Dashboard
-            </div>
-            """, unsafe_allow_html=True
-        )
+        render_html(render_metric_card(
+            "Champion Model AUC",
+            f"{best_auc:.4f}",
+            "Gradient Boosted Trees",
+            badge_text="Production",
+            badge_type="emerald"
+        ))
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    with st.container():
-        st.subheader("Project Objectives")
-        st.markdown("""
-        *   Identify high-risk subscribers weeks prior to contract termination for proactive retention.
-        *   Eliminate black-box opacity so customer success agents understand exactly why a customer intends to leave.
-        *   Preserve revenue streams by targeting retention budgets exclusively on salvageable, high-LTV accounts.
-        *   Provide real-time operational scoring and automated batch CSV prediction.
-        """)
-
-
-# =========================================================
-# PAGE 2: Data Overview & Schema
-# =========================================================
-elif page_selection == "Data Overview & Schema":
-    st.title("Data Overview & Schema")
-
-    if not df_sample.empty:
-        st.caption(f"Ingested Dataset Shape: {df_sample.shape[0]:,} rows x {df_sample.shape[1]} columns")
-        
-        tab_raw, tab_schema, tab_dist = st.tabs(["Data Viewer", "Schema & Quality Audit", "Storage Architecture"])
-        
-        with tab_raw:
-            st.dataframe(df_sample.head(50), use_container_width=True)
-            
-        with tab_schema:
-            col_s1, col_s2 = st.columns(2)
-            with col_s1:
-                st.markdown("#### Column Data Types & Unique Values")
-                dtype_df = pd.DataFrame({
-                    "Column": df_sample.columns,
-                    "Data Type": [str(t) for t in df_sample.dtypes],
-                    "Unique Count": [df_sample[c].nunique() for c in df_sample.columns],
-                    "Missing Count": [df_sample[c].isna().sum() for c in df_sample.columns]
-                })
-                st.dataframe(dtype_df, use_container_width=True)
-                
-            with col_s2:
-                st.markdown("#### Numerical Summary Statistics")
-                num_cols = df_sample.select_dtypes(include=[np.number]).columns
-                st.dataframe(df_sample[num_cols].describe().T.round(2), use_container_width=True)
-                
-        with tab_dist:
-            st.markdown("#### HDFS Distributed Parquet Architecture")
-            st.code("""
-data/hdfs_simulation/warehouse/telco/
-├── Contract=Month-to-month/
-│   └── part-00000.parquet
-├── Contract=One year/
-│   └── part-00001.parquet
-└── Contract=Two year/
-    └── part-00002.parquet
-            """, language="text")
-            st.caption("Simulates an enterprise Hadoop / Spark data lake partitioned by customer contractual commitment.")
-    else:
-        st.warning("Processed dataset not found.")
-
-
-# =========================================================
-# PAGE 3: Exploratory Data Analysis (EDA)
-# =========================================================
-elif page_selection == "Exploratory Analytics":
-    st.title("Exploratory Analytics")
-
+    # Main Visual Analytics Row
     breakdowns = eda_data.get("breakdowns", {})
+    col_v1, col_v2 = st.columns([1, 1.25])
 
-    with st.container():
-        r1_col1, r1_col2 = st.columns(2)
-        with r1_col1:
-            churn_dist = eda_data.get("kpis", {})
-            fig_donut = go.Figure(data=[go.Pie(
-                labels=['Retained', 'Churned'],
-                values=[churn_dist.get('retained_count', 5174), churn_dist.get('churn_count', 1869)],
-                hole=.55,
-                marker_colors=['#10b981', '#fb7185']
-            )])
-            fig_donut.update_layout(title="Overall Churn Ratio", height=380, template="plotly_dark", plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
-            st.plotly_chart(fig_donut, use_container_width=True)
+    with col_v1:
+        render_html("""
+        <div style="margin-bottom: 0.5rem;">
+            <h3 style="margin: 0; font-size: 1.15rem;">Revenue & Subscriber Ratio</h3>
+            <span style="font-size: 0.82rem; color: #7c6a60;">Gross account attrition distribution</span>
+        </div>
+        """)
+        fig_donut = go.Figure(data=[go.Pie(
+            labels=['Retained Accounts', 'At-Risk Churn Accounts'],
+            values=[kpis.get('retained_count', 5174), kpis.get('churn_count', 1869)],
+            hole=.6,
+            marker=dict(colors=['#0da371', '#ff6b4a'], line=dict(color='#ffffff', width=2)),
+            textinfo='percent',
+            textfont=dict(size=14, color='#ffffff', family='Plus Jakarta Sans')
+        )])
+        fig_donut.update_layout(
+            height=320,
+            margin=dict(l=10, r=10, t=10, b=10),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5, font=dict(color='#261914'))
+        )
+        st.plotly_chart(fig_donut, width="stretch")
 
-        with r1_col2:
-            contract_data = pd.DataFrame(breakdowns.get("by_contract", []))
-            if not contract_data.empty:
-                fig_contract = px.bar(
-                    contract_data,
-                    x="Contract",
-                    y=["Retained", "Churned"],
-                    title="Retention by Contract Type",
-                    barmode="group",
-                    color_discrete_sequence=['#10b981', '#fb7185'],
-                    template="plotly_dark",
-                    height=380
-                )
-                fig_contract.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
-                st.plotly_chart(fig_contract, use_container_width=True)
+    with col_v2:
+        render_html("""
+        <div style="margin-bottom: 0.5rem;">
+            <h3 style="margin: 0; font-size: 1.15rem;">Attrition by Contractual Commitment</h3>
+            <span style="font-size: 0.82rem; color: #7c6a60;">Month-to-month contracts account for 88.5% of churn events</span>
+        </div>
+        """)
+        contract_data = pd.DataFrame(breakdowns.get("by_contract", []))
+        if not contract_data.empty:
+            fig_contract = px.bar(
+                contract_data,
+                x="Contract",
+                y=["Retained", "Churned"],
+                barmode="group",
+                color_discrete_map={"Retained": "#0da371", "Churned": "#ff6b4a"},
+                height=320
+            )
+            fig_contract.update_layout(
+                margin=dict(l=10, r=10, t=10, b=10),
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="center", x=0.5, title=None, font=dict(color='#261914')),
+                xaxis=dict(gridcolor="#f3e3da", tickfont=dict(color='#261914')),
+                yaxis=dict(gridcolor="#f3e3da", tickfont=dict(color='#261914'))
+            )
+            st.plotly_chart(fig_contract, width="stretch")
 
-    with st.container():
-        r2_col1, r2_col2 = st.columns(2)
-        with r2_col1:
-            internet_data = pd.DataFrame(breakdowns.get("by_internet_service", []))
-            if not internet_data.empty:
-                fig_internet = px.bar(
-                    internet_data,
-                    y="InternetService",
-                    x="ChurnRate",
-                    orientation='h',
-                    title="Churn Distribution by Internet Service",
-                    color_discrete_sequence=['#10b981'],
-                    template="plotly_dark",
-                    height=380
-                )
-                fig_internet.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
-                st.plotly_chart(fig_internet, use_container_width=True)
+    st.markdown("<br>", unsafe_allow_html=True)
 
-        with r2_col2:
-            payment_data = pd.DataFrame(breakdowns.get("by_payment_method", []))
-            if not payment_data.empty:
-                fig_payment = px.bar(
-                    payment_data,
-                    y="PaymentMethod",
-                    x="ChurnRate",
-                    orientation='h',
-                    title="Churn Distribution by Payment Method",
-                    color_discrete_sequence=['#10b981'],
-                    template="plotly_dark",
-                    height=380
-                )
-                fig_payment.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
-                st.plotly_chart(fig_payment, use_container_width=True)
+    # Secondary Analytics Row
+    col_b1, col_b2 = st.columns(2)
+    with col_b1:
+        render_html("""
+        <div style="margin-bottom: 0.5rem;">
+            <h3 style="margin: 0; font-size: 1.15rem;">Churn Vulnerability by Internet Service</h3>
+            <span style="font-size: 0.82rem; color: #7c6a60;">Fiber optic accounts experience 41.9% churn rate due to missing support</span>
+        </div>
+        """)
+        internet_data = pd.DataFrame(breakdowns.get("by_internet_service", []))
+        if not internet_data.empty:
+            fig_internet = px.bar(
+                internet_data,
+                y="InternetService",
+                x="ChurnRate",
+                orientation='h',
+                color_discrete_sequence=['#f4a261'],
+                height=260
+            )
+            fig_internet.update_layout(
+                margin=dict(l=10, r=10, t=10, b=10),
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                xaxis=dict(title="Churn Rate (%)", gridcolor="#f3e3da", tickfont=dict(color='#261914')),
+                yaxis=dict(title=None, tickfont=dict(color='#261914'))
+            )
+            st.plotly_chart(fig_internet, width="stretch")
+
+    with col_b2:
+        render_html("""
+        <div style="margin-bottom: 0.5rem;">
+            <h3 style="margin: 0; font-size: 1.15rem;">Churn Vulnerability by Payment Channel</h3>
+            <span style="font-size: 0.82rem; color: #7c6a60;">Electronic check payments exhibit 3x higher churn than automated credit card</span>
+        </div>
+        """)
+        payment_data = pd.DataFrame(breakdowns.get("by_payment_method", []))
+        if not payment_data.empty:
+            fig_payment = px.bar(
+                payment_data,
+                y="PaymentMethod",
+                x="ChurnRate",
+                orientation='h',
+                color_discrete_sequence=['#ff6b4a'],
+                height=260
+            )
+            fig_payment.update_layout(
+                margin=dict(l=10, r=10, t=10, b=10),
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                xaxis=dict(title="Churn Rate (%)", gridcolor="#f3e3da", tickfont=dict(color='#261914')),
+                yaxis=dict(title=None, tickfont=dict(color='#261914'))
+            )
+            st.plotly_chart(fig_payment, width="stretch")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Architectural Pipeline Banner
+    render_html("""
+    <div class="insight-callout-peach">
+        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #d84315; margin-bottom: 0.35rem;">
+            End-to-End Enterprise Big Data Pipeline
+        </div>
+        <div style="font-weight: 600; font-size: 1rem; color: #261914; margin-bottom: 0.25rem;">
+            Distributed Data Lake &bull; PySpark Ingestion &bull; Spark MLlib Pipelines &bull; SHAP Explainability &bull; Prescriptive Recourse Engine
+        </div>
+        <div style="font-size: 0.85rem; color: #6d5a52;">
+            Scalable architecture partitioned by customer commitment in simulated HDFS Parquet tables. 
+            Automated model scoring directly triggers minimal-actionable recourse optimization for at-risk accounts.
+        </div>
+    </div>
+    """)
 
 
 # =========================================================
-# PAGE 4: Model Benchmarking & Performance
+# PAGE 2: Customer Intelligence & XAI
 # =========================================================
-elif page_selection == "Model Performance & ROC":
-    st.title("Model Performance & ROC")
+elif page_selection == "Customer Intelligence & XAI":
+    render_page_header_with_info(
+        page_title="Customer Intelligence & Explainability",
+        category_subtitle="Real-Time Scoring & Local Interpretability",
+        description="Input or modify individual subscriber parameters to receive immediate churn probability scoring paired with game-theoretic SHAP feature attributions that explain exactly why the customer intends to stay or depart.",
+        purpose="Provides frontline customer success teams and retention specialists with real-time, transparent risk diagnostics for individual accounts, eliminating 'black-box' guessing.",
+        what_it_tells=[
+            "Calibrated churn probability score and safety classification (Safe <30%, Moderate 30-60%, Critical >60%).",
+            "Exact additive SHAP value contributions for every customer feature (tenure, contract, payment method, monthly charges, add-on services).",
+            "Top 3 risk catalysts pushing probability UP vs top 3 mitigating anchors keeping probability DOWN.",
+            "Visual waterfall/bar attributions indicating the magnitude and direction of every lever."
+        ],
+        how_it_works="Passes subscriber attributes through the champion Gradient Boosted Trees model. The TreeSHAP engine computes exact Shapley values derived from cooperative game theory, ensuring that the sum of feature attributions equals the difference between model output and expected baseline.",
+        action_protocol="Use the top 3 risk catalysts during retention outreach to address the precise root causes (e.g. bundling tech support or converting to an annual term) rather than offering arbitrary blanket discounts."
+    )
+
+    if champion_pipeline is None or live_explainer is None:
+        st.error("Champion model or SHAP explainer artifacts could not be loaded.")
+    else:
+        col_input, col_output = st.columns([1, 1.25])
+
+        with col_input:
+            render_html("""
+            <div style="margin-bottom: 0.75rem;">
+                <h3 style="margin: 0; font-size: 1.2rem;">Subscriber Configuration</h3>
+                <span style="font-size: 0.82rem; color: #7c6a60;">Adjust account attributes to simulate live inference</span>
+            </div>
+            """)
+
+            with st.container():
+                st.markdown("#### Contractual & Billing Profile")
+                f_contract = st.selectbox("Contractual Agreement", ["Month-to-month", "One year", "Two year"], index=0)
+                f_payment = st.selectbox("Payment Method", ["Electronic check", "Mailed check", "Bank transfer (automatic)", "Credit card (automatic)"], index=0)
+                f_monthly = st.slider("Monthly Charges ($)", min_value=18.0, max_value=120.0, value=89.5, step=0.5)
+                f_tenure = st.slider("Account Tenure (Months)", min_value=1, max_value=72, value=4)
+
+                st.markdown("#### Service Subscriptions & Add-ons")
+                f_internet = st.selectbox("Internet Service Infrastructure", ["Fiber optic", "DSL", "No"], index=0)
+                
+                col_s1, col_s2 = st.columns(2)
+                with col_s1:
+                    f_tech_support = st.selectbox("Tech Support", ["No", "Yes", "No internet service"], index=0)
+                    f_security = st.selectbox("Online Security", ["No", "Yes", "No internet service"], index=0)
+                    f_backup = st.selectbox("Online Backup", ["No", "Yes", "No internet service"], index=0)
+                with col_s2:
+                    f_streaming_tv = st.selectbox("Streaming TV", ["No", "Yes", "No internet service"], index=1)
+                    f_streaming_movies = st.selectbox("Streaming Movies", ["No", "Yes", "No internet service"], index=1)
+                    f_paperless = st.selectbox("Paperless Billing", ["Yes", "No"], index=0)
+
+                f_gender = "Female"
+                f_senior = 0
+                f_partner = "No"
+                f_dependents = "No"
+                f_phone = "Yes"
+                f_lines = "No"
+                f_device_prot = "No"
+
+        raw_customer_dict = {
+            "gender": f_gender, "SeniorCitizen": f_senior, "Partner": f_partner, "Dependents": f_dependents,
+            "PhoneService": f_phone, "MultipleLines": f_lines, "InternetService": f_internet,
+            "OnlineSecurity": f_security, "OnlineBackup": f_backup, "DeviceProtection": f_device_prot,
+            "TechSupport": f_tech_support, "StreamingTV": f_streaming_tv, "StreamingMovies": f_streaming_movies,
+            "Contract": f_contract, "PaperlessBilling": f_paperless, "PaymentMethod": f_payment,
+            "tenure": f_tenure, "MonthlyCharges": f_monthly
+        }
+
+        full_feature_dict = compute_derived_features(raw_customer_dict)
+        input_df = pd.DataFrame([full_feature_dict])
+
+        with col_output:
+            churn_prob = float(champion_pipeline.predict_proba(input_df)[0, 1])
+
+            # Determine dynamic status styling
+            if churn_prob >= 0.55:
+                risk_tier = "Critical Flight Risk"
+                risk_color = "#e76f51"
+                badge_type = "coral"
+            elif churn_prob >= 0.35:
+                risk_tier = "Moderate Risk (Vulnerable)"
+                risk_color = "#f4a261"
+                badge_type = "amber"
+            else:
+                risk_tier = "Stable (Low Risk)"
+                risk_color = "#0da371"
+                badge_type = "emerald"
+
+            render_html(f"""
+            <div style="margin-bottom: 0.75rem;">
+                <h3 style="margin: 0; font-size: 1.2rem;">Diagnostic Scorecard</h3>
+                <span style="font-size: 0.82rem; color: #7c6a60;">Production model confidence & risk classification</span>
+            </div>
+            """)
+
+            # Speedometer Gauge
+            fig_gauge = go.Figure(go.Indicator(
+                mode="gauge+number",
+                value=churn_prob * 100,
+                number={'suffix': "%", 'font': {'size': 44, 'color': risk_color, 'family': 'Plus Jakarta Sans', 'weight': 800}},
+                title={'text': f"Predicted Churn Propensity<br><span style='font-size:0.85rem;color:#7c6a60;'>Status: {risk_tier}</span>", 'font': {'size': 16, 'color': '#1f1612', 'family': 'Plus Jakarta Sans'}},
+                gauge={
+                    'axis': {'range': [0, 100], 'tickcolor': '#8c786e', 'tickwidth': 1},
+                    'bar': {'color': risk_color, 'thickness': 0.28},
+                    'bgcolor': '#fff7f2',
+                    'borderwidth': 1,
+                    'bordercolor': '#f6ded2',
+                    'steps': [
+                        {'range': [0, 35], 'color': '#ecfdf5'},
+                        {'range': [35, 60], 'color': '#fffbeb'},
+                        {'range': [60, 100], 'color': '#fff1f2'}
+                    ]
+                }
+            ))
+            fig_gauge.update_layout(
+                height=260,
+                margin=dict(l=20, r=20, t=40, b=10),
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)"
+            )
+            st.plotly_chart(fig_gauge, width="stretch")
+
+            # Local SHAP Risk Drivers Bar Chart
+            st.markdown("#### Primary Churn Drivers (Local SHAP Attribution)")
+            preproc = live_explainer["preprocessor"]
+            explainer = live_explainer["explainer"]
+            readable_names = live_explainer["readable_feature_names"]
+
+            X_single_trans = preproc.transform(input_df)
+            raw_shap = explainer.shap_values(X_single_trans)
+
+            if isinstance(raw_shap, list) and len(raw_shap) == 2:
+                single_shap = raw_shap[1][0]
+            elif isinstance(raw_shap, np.ndarray) and raw_shap.ndim == 3:
+                single_shap = raw_shap[0, :, 1]
+            elif isinstance(raw_shap, np.ndarray) and raw_shap.ndim == 2:
+                single_shap = raw_shap[0]
+            else:
+                single_shap = raw_shap
+
+            paired_shap = list(zip(readable_names, single_shap))
+            top_contributors = sorted(paired_shap, key=lambda x: abs(x[1]), reverse=True)[:7]
+            top_feats_df = pd.DataFrame(top_contributors, columns=["Feature", "SHAP Impact"])
+            # Palette mapping from user swatch: distinct tonal hues across top drivers
+            coral_palette = ["#d84315", "#ff6b4a", "#f28e79", "#f4a261", "#e99d42", "#fac984", "#fed6a4"]
+            emerald_palette = ["#0da371", "#2a9d8f", "#52b788", "#74c69d", "#84a98c", "#a3b18a", "#b7e4c7"]
+
+            pos_idx = 0
+            neg_idx = 0
+            bar_colors = []
+            for val in top_feats_df["SHAP Impact"]:
+                if val >= 0:
+                    bar_colors.append(coral_palette[min(pos_idx, len(coral_palette) - 1)])
+                    pos_idx += 1
+                else:
+                    bar_colors.append(emerald_palette[min(neg_idx, len(emerald_palette) - 1)])
+                    neg_idx += 1
+
+            top_feats_df["BarColor"] = bar_colors
+
+            fig_shap_bar = go.Figure(go.Bar(
+                x=top_feats_df["SHAP Impact"],
+                y=top_feats_df["Feature"],
+                orientation='h',
+                marker=dict(
+                    color=top_feats_df["BarColor"],
+                    line=dict(color='#ffffff', width=1.5)
+                ),
+                hovertemplate="<b>%{y}</b><br>Marginal SHAP: %{x:+.3f}<extra></extra>"
+            ))
+            fig_shap_bar.update_layout(
+                yaxis={'categoryorder': 'total ascending', 'tickfont': {'color': '#261914', 'family': 'Plus Jakarta Sans', 'size': 12}},
+                xaxis={'title': "Marginal SHAP Contribution (Log-Odds Impact)", 'gridcolor': '#f3e3da', 'tickfont': {'color': '#261914', 'family': 'Plus Jakarta Sans'}},
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                height=290,
+                margin=dict(l=10, r=10, t=10, b=10)
+            )
+            st.plotly_chart(fig_shap_bar, width="stretch")
+
+            # Local SHAP Educational Explanation Box
+            render_html("""
+            <div style="background: #ffffff; border: 1px solid #f6ded2; border-radius: 14px; padding: 1.25rem 1.4rem; margin-top: 1rem; box-shadow: 0 4px 16px rgba(231, 111, 81, 0.05);">
+                <div style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #e76f51; margin-bottom: 0.6rem;">
+                    SHAP Interpretability Guide &mdash; How to Read This Customer's Attribution Breakdown
+                </div>
+                <div style="font-size: 0.86rem; color: #3b2c25; line-height: 1.65;">
+                    <p style="margin: 0 0 0.65rem 0;">
+                        <strong>What is SHAP?</strong> SHAP (SHapley Additive exPlanations) is rooted in cooperative game theory. 
+                        Instead of treating the model as a black box, it decomposes the prediction into the exact additive contribution of each contract and service feature for this customer relative to the portfolio baseline churn rate (26.5%).
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.75rem; margin-top: 0.5rem;">
+                        <div style="background: #fff5f2; border: 1px solid #ffd8cc; border-radius: 8px; padding: 0.85rem;">
+                            <strong style="color: #ff6b4a; font-size: 0.88rem;">Coral / Orange Bars (Risk Drivers):</strong><br>
+                            <span style="font-size: 0.82rem; color: #5a463e;">
+                                Features pushing this subscriber's flight risk <strong>higher</strong> (e.g., month-to-month contract, missing technical support, or high monthly invoice). These are the prime targets for prescriptive counterfactual intervention.
+                            </span>
+                        </div>
+                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 0.85rem;">
+                            <strong style="color: #0da371; font-size: 0.88rem;">Emerald / Green Bars (Retention Anchors):</strong><br>
+                            <span style="font-size: 0.82rem; color: #2e4a3d;">
+                                Features pulling risk <strong>safely downward</strong> away from cancellation (e.g., long account tenure, automated bank transfers, or active cybersecurity suites).
+                            </span>
+                        </div>
+                        <div style="background: #fffbf0; border: 1px solid #fde68a; border-radius: 8px; padding: 0.85rem;">
+                            <strong style="color: #b45309; font-size: 0.88rem;">Bar Magnitude (Length):</strong><br>
+                            <span style="font-size: 0.82rem; color: #5a463e;">
+                                The horizontal span indicates the <strong>exact mathematical strength</strong> of that feature. Longer bars represent the highest-leverage operational catalysts for this account.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            """)
+
+            if churn_prob >= 0.35:
+                render_html(f"""
+                <div class="insight-callout-peach" style="margin-top: 1rem;">
+                    <strong>Prescriptive Intervention Recommended:</strong> This subscriber demonstrates a {churn_prob*100:.1f}% churn risk driven by contract volatility and service friction. 
+                    Navigate to the <strong>Prescriptive AI & Retention</strong> page to solve for the minimal-cost retention policy.
+                </div>
+                """)
+
+
+# =========================================================
+# PAGE 3: Prescriptive AI & Retention
+# =========================================================
+elif page_selection == "Prescriptive AI & Retention":
+    render_page_header_with_info(
+        page_title="Prescriptive Counterfactual Retention Engine",
+        category_subtitle="Algorithmic Recourse & Prescriptive Intelligence",
+        description="Moving beyond passive prediction. This engine formulates minimal-cost actionable counterfactual interventions (Wachter framework) to calculate the precise commercial offers that flip high-risk subscribers into loyal accounts with proven ROI.",
+        purpose="Transforms diagnostic predictions into prescriptive, cost-optimized business interventions that mathematically guarantee account retention while maximizing preserved enterprise revenue.",
+        what_it_tells=[
+            "Standardized enterprise retention packages with simulated risk reduction and net preserved annual revenue ($/yr).",
+            "Dual interactive gauges demonstrating Before-Intervention vs After-Intervention churn probability in real time.",
+            "Algorithmic Recourse Optimizer calculating the minimal-effort feature adjustments required to achieve an account safety threshold (<30%).",
+            "Economic trade-off analysis comparing implementation costs against preserved lifetime contract value."
+        ],
+        how_it_works="Formulates recourse as an optimization problem: minimizing the distance between the original account profile and candidate counterfactual states subject to model score constraints. Mutable levers (contracts, discounts, add-on services) are explored while immutable traits (gender, senior citizen, tenure) remain locked.",
+        action_protocol="Deploy the pre-approved retention package yielding the highest net ROI, or execute the minimal counterfactual recourse package during contract renegotiations."
+    )
+
+    if champion_pipeline is None:
+        st.error("Champion model pipeline not loaded.")
+    else:
+        # Profile Configuration Row
+        col_p1, col_p2, col_p3 = st.columns([1.2, 1, 1])
+        with col_p1:
+            persona_choice = st.selectbox(
+                "Benchmark Target Persona",
+                [
+                    "High Flight Risk (Month-to-month, Fiber, No Support)",
+                    "Support Deficient High Spender ($95/mo, Multiple Lines)",
+                    "Price Sensitive Senior ($68/mo, Electronic Check)",
+                    "Custom Profile Sandbox"
+                ]
+            )
+
+        if "High Flight" in persona_choice:
+            p_contract = "Month-to-month"
+            p_pay = "Electronic check"
+            p_internet = "Fiber optic"
+            p_tenure = 3
+            p_monthly = 89.5
+            p_tech = "No"
+            p_sec = "No"
+            p_backup = "No"
+        elif "Support Deficient" in persona_choice:
+            p_contract = "Month-to-month"
+            p_pay = "Bank transfer (automatic)"
+            p_internet = "Fiber optic"
+            p_tenure = 8
+            p_monthly = 95.0
+            p_tech = "No"
+            p_sec = "No"
+            p_backup = "Yes"
+        elif "Price Sensitive" in persona_choice:
+            p_contract = "Month-to-month"
+            p_pay = "Electronic check"
+            p_internet = "DSL"
+            p_tenure = 12
+            p_monthly = 68.0
+            p_tech = "No"
+            p_sec = "No"
+            p_backup = "No"
+        else:
+            p_contract = "Month-to-month"
+            p_pay = "Electronic check"
+            p_internet = "Fiber optic"
+            p_tenure = 4
+            p_monthly = 85.0
+            p_tech = "No"
+            p_sec = "No"
+            p_backup = "No"
+
+        with col_p2:
+            target_threshold = st.slider("Target Safety Threshold (% Max Risk)", min_value=15, max_value=40, value=30, step=5) / 100.0
+
+        with col_p3:
+            render_html(f"""
+            <div style="background: #ffffff; border: 1px solid #f6ded2; border-radius: 12px; padding: 0.9rem 1.15rem; margin-top: 0.25rem;">
+                <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #8e7a70;">Optimization Constraint</div>
+                <div style="font-size: 1.25rem; font-weight: 800; color: #d84315;">Reduce Risk &le; {target_threshold * 100:.0f}%</div>
+                <div style="font-size: 0.78rem; color: #7c6a60; margin-top: 0.2rem;">Minimizing total promotional cost</div>
+            </div>
+            """)
+
+        target_customer = {
+            "gender": "Female", "SeniorCitizen": 0, "Partner": "No", "Dependents": "No",
+            "PhoneService": "Yes", "MultipleLines": "No", "InternetService": p_internet,
+            "OnlineSecurity": p_sec, "OnlineBackup": p_backup, "DeviceProtection": "No",
+            "TechSupport": p_tech, "StreamingTV": "Yes", "StreamingMovies": "Yes",
+            "Contract": p_contract, "PaperlessBilling": "Yes", "PaymentMethod": p_pay,
+            "tenure": p_tenure, "MonthlyCharges": p_monthly
+        }
+
+        # 1. Run Algorithmic Minimal Actionable Recourse Search
+        recourse_result = optimize_minimal_actionable_recourse(
+            target_customer, champion_pipeline, target_risk=target_threshold
+        )
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.subheader("Algorithmic Minimal Actionable Recourse (Solver Output)")
+
+        col_r1, col_r2, col_r3, col_r4 = st.columns(4)
+        base_p = recourse_result["baseline_probability"]
+        new_p = recourse_result["intervened_probability"]
+        net_saved = recourse_result["net_value_saved"]
+        roi_rec = recourse_result["roi_pct"]
+
+        with col_r1:
+            render_html(render_metric_card(
+                "Baseline Churn Risk",
+                f"{base_p * 100:.1f}%",
+                "Unmanaged risk state",
+                badge_text="Initial State",
+                badge_type="coral"
+            ))
+        with col_r2:
+            render_html(render_metric_card(
+                "Optimized Recourse Risk",
+                f"{new_p * 100:.1f}%",
+                f"Absolute drop: {(base_p - new_p) * 100:.1f}%",
+                badge_text="Target Met",
+                badge_type="emerald"
+            ))
+        with col_r3:
+            render_html(render_metric_card(
+                "Annual Retention Cost",
+                f"${recourse_result['annual_cost']:.2f}",
+                "Discounts & service subsidies",
+                badge_text="Budget Needed",
+                badge_type="blue"
+            ))
+        with col_r4:
+            render_html(render_metric_card(
+                "Net Return on Spend (ROI)",
+                f"{roi_rec:.1f}%",
+                f"Net Saved: ${net_saved:,.2f}/yr",
+                badge_text="High Return",
+                badge_type="emerald"
+            ))
+
+        # Show recommended actionable levers
+        rec_interventions = recourse_result.get("recommended_interventions", {})
+        if rec_interventions:
+            render_html(f"""
+            <div class="insight-callout-peach">
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #d84315; margin-bottom: 0.35rem;">
+                    Optimal Prescriptive Action Policy
+                </div>
+                <div style="font-size: 0.95rem; font-weight: 600; color: #1e1713; margin-bottom: 0.5rem;">
+                    {recourse_result.get('message', '')}
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 0.5rem;">
+                    <div style="background: #ffffff; padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid #fedecd;">
+                        <span style="font-size: 0.75rem; color: #8e7a70;">Contract Duration:</span><br>
+                        <strong style="color: #d84315;">{rec_interventions.get('Contract', p_contract)}</strong>
+                    </div>
+                    <div style="background: #ffffff; padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid #fedecd;">
+                        <span style="font-size: 0.75rem; color: #8e7a70;">Dedicated Tech Support:</span><br>
+                        <strong style="color: #2a9d8f;">{rec_interventions.get('TechSupport', p_tech)}</strong>
+                    </div>
+                    <div style="background: #ffffff; padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid #fedecd;">
+                        <span style="font-size: 0.75rem; color: #8e7a70;">Digital Security Suite:</span><br>
+                        <strong style="color: #2a9d8f;">{rec_interventions.get('OnlineSecurity', p_sec)}</strong>
+                    </div>
+                    <div style="background: #ffffff; padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid #fedecd;">
+                        <span style="font-size: 0.75rem; color: #8e7a70;">Payment Modernization:</span><br>
+                        <strong style="color: #1e1713;">{rec_interventions.get('PaymentMethod', p_pay)}</strong>
+                    </div>
+                    <div style="background: #ffffff; padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid #fedecd;">
+                        <span style="font-size: 0.75rem; color: #8e7a70;">Monthly Loyalty Concession:</span><br>
+                        <strong style="color: #d84315;">${rec_interventions.get('monthly_discount_usd', 0.0):.2f}/mo ({rec_interventions.get('discount_pct', 0.0):.0f}%)</strong>
+                    </div>
+                </div>
+            </div>
+            """)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ---------------------------------------------------------
+        # SECTION 2: Interactive "What-If" Counterfactual Sandbox (MOVED ABOVE PACKAGES)
+        # ---------------------------------------------------------
+        st.subheader("Interactive 'What-If' Simulation Sandbox")
+        with st.container():
+            col_sb1, col_sb2 = st.columns([1, 1.25])
+
+            with col_sb1:
+                render_html("""
+                <div style="margin-bottom: 0.5rem;">
+                    <h4 style="margin: 0; font-size: 1.05rem;">Simulate Custom Interventions</h4>
+                    <span style="font-size: 0.82rem; color: #7c6a60;">Test hypothetical promotional mixes</span>
+                </div>
+                """)
+                sim_contract = st.selectbox("Proposed Contract Term", ["Month-to-month", "One year", "Two year"], index=1)
+                sim_payment = st.selectbox("Proposed Payment Channel", ["Electronic check", "Bank transfer (automatic)", "Credit card (automatic)"], index=1)
+                
+                col_t1, col_t2 = st.columns(2)
+                with col_t1:
+                    sim_tech = st.selectbox("Bundle Tech Support", ["No", "Yes"], index=1)
+                    sim_security = st.selectbox("Bundle Online Security", ["No", "Yes"], index=1)
+                with col_t2:
+                    sim_discount = st.slider("Monthly Loyalty Discount ($)", min_value=0.0, max_value=25.0, value=10.0, step=2.5)
+
+                custom_sim = simulate_intervention(
+                    target_customer,
+                    {
+                        "Contract": sim_contract,
+                        "PaymentMethod": sim_payment,
+                        "TechSupport": sim_tech,
+                        "OnlineSecurity": sim_security
+                    },
+                    champion_pipeline,
+                    monthly_discount_usd=sim_discount,
+                    service_subsidy_cost_monthly=3.0 if (sim_tech == "Yes" or sim_security == "Yes") else 0.0
+                )
+
+            with col_sb2:
+                render_html("""
+                <div style="margin-bottom: 0.5rem;">
+                    <h4 style="margin: 0; font-size: 1.05rem;">Real-Time Recourse Evaluation</h4>
+                    <span style="font-size: 0.82rem; color: #7c6a60;">Pre vs Post intervention risk & net unit economics</span>
+                </div>
+                """)
+                
+                sb_base_p = custom_sim["baseline_probability"]
+                sb_new_p = custom_sim["intervened_probability"]
+
+                fig_dual_gauge = go.Figure()
+                fig_dual_gauge.add_trace(go.Indicator(
+                    mode="gauge+number",
+                    value=sb_base_p * 100,
+                    number={'suffix': "%", 'font': {'size': 26, 'color': '#ff6b4a', 'family': 'Plus Jakarta Sans', 'weight': 700}},
+                    title={'text': "Pre-Intervention", 'font': {'size': 14, 'color': '#7c6a60', 'family': 'Plus Jakarta Sans'}},
+                    domain={'x': [0, 0.48], 'y': [0, 1]},
+                    gauge={'axis': {'range': [0, 100]}, 'bar': {'color': '#ff6b4a', 'thickness': 0.3}, 'bgcolor': '#fff5f0'}
+                ))
+                fig_dual_gauge.add_trace(go.Indicator(
+                    mode="gauge+number",
+                    value=sb_new_p * 100,
+                    number={'suffix': "%", 'font': {'size': 26, 'color': '#0da371', 'family': 'Plus Jakarta Sans', 'weight': 700}},
+                    title={'text': "Post-Intervention", 'font': {'size': 14, 'color': '#7c6a60', 'family': 'Plus Jakarta Sans'}},
+                    domain={'x': [0.52, 1], 'y': [0, 1]},
+                    gauge={'axis': {'range': [0, 100]}, 'bar': {'color': '#0da371', 'thickness': 0.3}, 'bgcolor': '#ecfdf5'}
+                ))
+                fig_dual_gauge.update_layout(
+                    height=200,
+                    margin=dict(l=10, r=10, t=25, b=10),
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)"
+                )
+                st.plotly_chart(fig_dual_gauge, width="stretch")
+
+                col_res1, col_res2, col_res3 = st.columns(3)
+                with col_res1:
+                    render_html(f"""
+                    <div style="background: #ffffff; border: 1px solid #f6ded2; border-radius: 10px; padding: 0.75rem; text-align: center;">
+                        <span style="font-size: 0.72rem; color: #8c786e; text-transform: uppercase; font-weight: 700;">Net Preserved Value</span>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: #0da371;">${custom_sim['net_value_saved']:.2f}/yr</div>
+                    </div>
+                    """)
+                with col_res2:
+                    render_html(f"""
+                    <div style="background: #ffffff; border: 1px solid #f6ded2; border-radius: 10px; padding: 0.75rem; text-align: center;">
+                        <span style="font-size: 0.72rem; color: #8c786e; text-transform: uppercase; font-weight: 700;">Intervention Cost</span>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: #1e1713;">${custom_sim['annual_intervention_cost']:.2f}/yr</div>
+                    </div>
+                    """)
+                with col_res3:
+                    render_html(f"""
+                    <div style="background: #ffffff; border: 1px solid #f6ded2; border-radius: 10px; padding: 0.75rem; text-align: center;">
+                        <span style="font-size: 0.72rem; color: #8c786e; text-transform: uppercase; font-weight: 700;">Projected ROI</span>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: #ff6b4a;">{custom_sim['roi_pct']:.1f}%</div>
+                    </div>
+                    """)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ---------------------------------------------------------
+        # SECTION 3: Standardized Action Packages
+        # ---------------------------------------------------------
+        st.subheader("Standardized Enterprise Retention Packages")
+        packages = generate_prescriptive_packages(target_customer, champion_pipeline)
+
+        pkg_cols = st.columns(len(packages))
+        for idx, pkg in enumerate(packages):
+            m = pkg["metrics"]
+            with pkg_cols[idx]:
+                actions_li = "".join([f"<li style='margin-bottom: 0.25rem;'>{act}</li>" for act in pkg['actions']])
+                render_html(f"""
+                <div class="package-card">
+                    <div class="badge-soft badge-coral" style="margin-bottom: 0.5rem;">{pkg['target_persona']}</div>
+                    <h3 style="font-size: 1.15rem; color: #1e1713; margin: 0 0 0.5rem 0;">{pkg['name']}</h3>
+                    <p style="color: #6d5b52; font-size: 0.84rem; line-height: 1.5; min-height: 52px; margin-bottom: 1rem;">
+                        {pkg['description']}
+                    </p>
+                    
+                    <div style="background: #fff8f4; border: 1px solid #fedecd; border-radius: 10px; padding: 0.85rem; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem; font-size: 0.82rem;">
+                            <span style="color: #7c6a60;">Risk Transition:</span>
+                            <strong style="color: #0da371;">{m['baseline_probability']*100:.1f}% &rarr; {m['intervened_probability']*100:.1f}% (-{m['risk_drop_pct']:.1f}%)</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem; font-size: 0.82rem;">
+                            <span style="color: #7c6a60;">Annual Spend Cost:</span>
+                            <strong style="color: #1e1713;">${m['annual_intervention_cost']:.2f}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem; font-size: 0.82rem;">
+                            <span style="color: #7c6a60;">Preserved Revenue:</span>
+                            <strong style="color: #1e1713;">${m['annual_revenue_saved']:.2f}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+                            <span style="color: #7c6a60;">Projected ROI:</span>
+                            <strong style="color: #ff6b4a; font-size: 0.9rem;">{m['roi_pct']:.1f}%</strong>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 0.8rem; color: #4a3b34;">
+                        <strong>Execution Protocol:</strong>
+                        <ul style="padding-left: 1.15rem; margin-top: 0.4rem; color: #6d5b52;">
+                            {actions_li}
+                        </ul>
+                    </div>
+                </div>
+                """)
+
+
+# =========================================================
+# PAGE 4: Portfolio Cohort Matrix
+# =========================================================
+elif page_selection == "Portfolio Cohort Matrix":
+    render_page_header_with_info(
+        page_title="Portfolio Cohort Matrix & Budget Optimizer",
+        category_subtitle="Batch Scoring & Resource Allocation",
+        description="Score subscriber cohorts to partition accounts into the 4-Quadrant Strategic Resource Allocation Matrix. Optimizes retention team capacity by separating high-touch targets from automated and cost-sensitive segments.",
+        purpose="Enables operational leaders and retention directors to batch-score thousands of accounts simultaneously and allocate retention personnel and capital with mathematical efficiency.",
+        what_it_tells=[
+            "4-Quadrant segmentation mapping accounts across Predicted Churn Risk (X-axis) and Monthly Charges (Y-axis).",
+            "High-Touch Retention Targets (High Risk, High MRR) vs Automated Digital Nudges (High Risk, Low MRR).",
+            "Cost-Sensitive Intervention accounts (Low Risk, High MRR) vs Organic Loyalty monitoring (Low Risk, Low MRR).",
+            "Exportable CSV dataset containing calibrated risk probabilities, assigned quadrants, and prescribed operational strategies."
+        ],
+        how_it_works="Executes batch vector inference across the uploaded or benchmark cohort, evaluates business thresholds (default 50% risk threshold, $70/mo MRR boundary), and tags each account with specialized operational protocols.",
+        action_protocol="Export the prescribed CSV cohort directly into your CRM (Salesforce/HubSpot) to route high-touch targets to senior account executives and trigger automated renewal email workflows for low-MRR accounts."
+    )
+
+    if champion_pipeline is None:
+        st.error("Champion model not loaded.")
+    else:
+        col_up1, col_up2 = st.columns([1.5, 1])
+        with col_up1:
+            uploaded_file = st.file_uploader("Upload CSV for Batch Scoring", type=["csv"])
+        with col_up2:
+            st.markdown("<div style='height: 1.8rem;'></div>", unsafe_allow_html=True)
+            load_benchmark = st.button("Load Standard Evaluation Benchmark Cohort (200 Records)")
+
+        batch_source = None
+        if uploaded_file is not None:
+            batch_source = pd.read_csv(uploaded_file)
+            st.caption(f"Loaded {len(batch_source):,} uploaded records.")
+        elif load_benchmark or not df_sample.empty:
+            batch_source = df_sample.head(200).copy()
+            st.caption("Loaded 200 benchmark enterprise subscriber records.")
+
+        if batch_source is not None:
+            cohort_analysis = analyze_cohort_prescriptive_matrix(batch_source, champion_pipeline)
+            df_scored = cohort_analysis["scored_dataframe"]
+            fin = cohort_analysis["financial_summary"]
+            q_counts = cohort_analysis["quadrant_counts"]
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.subheader("Cohort Financial Projections & Program ROI")
+
+            col_cf1, col_cf2, col_cf3, col_cf4 = st.columns(4)
+            with col_cf1:
+                render_html(render_metric_card(
+                    "Annual Revenue at Risk",
+                    f"${fin['annual_revenue_exposure']:,.0f}",
+                    "Total cohort exposure",
+                    badge_text="Gross Risk",
+                    badge_type="coral"
+                ))
+            with col_cf2:
+                render_html(render_metric_card(
+                    "Recoverable Revenue",
+                    f"${fin['total_recoverable_revenue']:,.0f}",
+                    "Preserved via intervention",
+                    badge_text="Target Protection",
+                    badge_type="emerald"
+                ))
+            with col_cf3:
+                render_html(render_metric_card(
+                    "Retention Budget Needed",
+                    f"${fin['required_retention_budget']:,.0f}",
+                    "High-touch & automated spend",
+                    badge_text="Investment",
+                    badge_type="blue"
+                ))
+            with col_cf4:
+                render_html(render_metric_card(
+                    "Cohort Program ROI",
+                    f"{fin['program_roi_pct']:.1f}%",
+                    f"Net: ${fin['net_economic_benefit']:,.0f}",
+                    badge_text="Net Multiple",
+                    badge_type="emerald"
+                ))
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            # Interactive Plotly Matrix Scatter & Quadrant breakdown
+            col_sc1, col_sc2 = st.columns([1.5, 1])
+            with col_sc1:
+                render_html("""
+                <div style="margin-bottom: 0.5rem;">
+                    <h3 style="margin: 0; font-size: 1.15rem;">Strategic Resource Allocation Matrix</h3>
+                    <span style="font-size: 0.82rem; color: #7c6a60;">Quadrant map partitioning monthly charges against predicted churn risk</span>
+                </div>
+                """)
+                fig_matrix = px.scatter(
+                    df_scored,
+                    x="MonthlyCharges",
+                    y="predicted_churn_risk",
+                    color="retention_quadrant",
+                    color_discrete_map={
+                        "Immediate High-Touch Retention": "#ff6b4a",
+                        "Automated Self-Serve Incentives": "#f4a261",
+                        "Cost-Sensitive Monitoring": "#84a98c",
+                        "Secure Base (Maintain)": "#0da371"
+                    },
+                    hover_data=["Contract", "tenure"],
+                    height=380,
+                    labels={"predicted_churn_risk": "Predicted Churn Propensity", "MonthlyCharges": "Monthly Charges ($)"}
+                )
+                fig_matrix.add_hline(y=0.60, line_dash="dash", line_color="#d7ccc8")
+                fig_matrix.add_vline(x=70.0, line_dash="dash", line_color="#d7ccc8")
+                fig_matrix.update_layout(
+                    margin=dict(l=10, r=10, t=10, b=10),
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    xaxis=dict(gridcolor="#f3e3da", tickfont=dict(color='#261914')),
+                    yaxis=dict(gridcolor="#f3e3da", tickfont=dict(color='#261914')),
+                    legend=dict(orientation="h", yanchor="bottom", y=-0.32, xanchor="center", x=0.5, title=None, font=dict(color='#261914'))
+                )
+                st.plotly_chart(fig_matrix, width="stretch")
+
+            with col_sc2:
+                render_html("""
+                <div style="margin-bottom: 0.5rem;">
+                    <h3 style="margin: 0; font-size: 1.15rem;">Quadrant Volume & Strategy</h3>
+                    <span style="font-size: 0.82rem; color: #7c6a60;">Account distribution & recommended operational protocols</span>
+                </div>
+                """)
+                for q_name, count in q_counts.items():
+                    pct = (count / len(df_scored)) * 100.0
+                    badge_cls = "badge-coral" if "High-Touch" in q_name else ("badge-amber" if "Automated" in q_name else ("badge-blue" if "Cost" in q_name else "badge-emerald"))
+                    render_html(f"""
+                    <div style="background: #ffffff; border: 1px solid #f6ded2; border-radius: 10px; padding: 0.75rem 0.9rem; margin-bottom: 0.5rem; box-shadow: 0 2px 8px rgba(231, 111, 81, 0.03);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: #1e1713; font-size: 0.85rem;">{q_name}</strong>
+                            <span class="badge-soft {badge_cls}">{count:,} ({pct:.1f}%)</span>
+                        </div>
+                    </div>
+                    """)
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("### Scored Cohort Data Table")
+            display_cols = ["predicted_churn_risk", "retention_quadrant", "recommended_strategy", "Contract", "MonthlyCharges", "tenure"]
+            if "customerID" in df_scored.columns:
+                display_cols = ["customerID"] + display_cols
+            available_cols = [c for c in display_cols if c in df_scored.columns]
+            st.dataframe(df_scored[available_cols].head(100), width="stretch")
+
+            csv_export = df_scored.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="Export Scored & Prescribed Dataset (CSV)",
+                data=csv_export,
+                file_name="prescriptive_scored_cohort.csv",
+                mime="text/csv",
+                width="stretch"
+            )
+
+
+# =========================================================
+# PAGE 5: Model Benchmarks & Data Governance
+# =========================================================
+elif page_selection == "Model Benchmarks & Data":
+    render_page_header_with_info(
+        page_title="Model Benchmarks & Data Governance",
+        category_subtitle="Empirical Validation & Data Lake Architecture",
+        description="Rigorous cross-validation benchmarks comparing Scikit-Learn and Apache Spark MLlib candidate architectures, paired with simulated HDFS Parquet storage partitions and global SHAP interpretability.",
+        purpose="Serves as the data science audit, architectural verification, and regulatory compliance center for ML pipelines, enterprise storage, and model governance.",
+        what_it_tells=[
+            "Comparative model leaderboard benchmarking Gradient Boosted Trees, Random Forest, Logistic Regression, and Spark MLlib across Accuracy, Precision, Recall, F1, ROC-AUC, and PR-AUC.",
+            "Empirical evidence justifying the GBT champion model's superiority in isolating high-order non-linear feature interactions.",
+            "Global SHAP feature importance rankings validating domain parity across the entire 7,043 subscriber cohort.",
+            "Simulated HDFS Parquet data lake partition hierarchy, schema metadata, and null-integrity audit."
+        ],
+        how_it_works="Evaluates models on stratified holdout test partitions using identical preprocessing pipelines. Inspects Parquet schema types and null counts to confirm ETL pipeline data hygiene.",
+        action_protocol="MLOps engineers and compliance officers audit model calibration, monitor feature distributions for data drift, and ensure algorithmic fairness before production redeployments."
+    )
 
     metrics_list = model_eval.get("metrics_summary", [])
     if metrics_list:
         m_df = pd.DataFrame(metrics_list)
         
-        with st.container():
-            st.markdown("### Model Leaderboard")
-            st.dataframe(
-                m_df[["Model", "Accuracy", "Precision", "Recall", "F1_Score", "ROC_AUC", "PR_AUC"]],
-                use_container_width=True
-            )
+        st.subheader("Model Performance Leaderboard")
+        st.dataframe(
+            m_df[["Model", "Accuracy", "Precision", "Recall", "F1_Score", "ROC_AUC", "PR_AUC"]],
+            width="stretch"
+        )
 
-        with st.container():
-            col_m1, col_m2 = st.columns(2)
-            with col_m1:
-                st.markdown("#### Benchmark ROC Curve")
-                fig_path = BASE_DIR / "reports" / "figures" / "roc_curves_comparison.png"
-                if fig_path.exists():
-                    st.image(str(fig_path), use_container_width=True)
-                
-            with col_m2:
-                st.markdown("#### Confusion Matrices Benchmark")
-                cm_path = BASE_DIR / "reports" / "figures" / "confusion_matrices_comparison.png"
-                if cm_path.exists():
-                    st.image(str(cm_path), use_container_width=True)
-                
-        with st.container():
-            best_name = model_eval.get("best_model_name", "Gradient Boosted Trees")
-            st.markdown(
-                f"""
-                <div style="padding: 1rem; background-color: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; border-radius: 4px; color: #f8fafc; font-weight: 500;">
-                    Active Champion Model: {best_name}
-                </div>
-                """, unsafe_allow_html=True
-            )
-    else:
-        st.warning("Model evaluation metrics not found.")
+        render_html("""
+        <div class="insight-callout-peach" style="margin-top: 1rem;">
+            <strong style="color: #d84315;">Production Champion:</strong> Gradient Boosted Trees achieved the highest Area Under the ROC Curve (0.8464) and PR-AUC (0.6639). 
+            Tree ensembles capture high-dimensional non-linear interactions (e.g. Fiber optic internet with electronic checks) that linear boundaries cannot isolate.
+        </div>
+        """)
 
+        st.markdown("<br>", unsafe_allow_html=True)
 
-# =========================================================
-# PAGE 5: Live XAI Churn Predictor
-# =========================================================
-elif page_selection == "Live Churn Inference & Explainability":
-    st.title("Live Churn Inference & Explainability")
-
-    if champion_pipeline is None or live_explainer is None:
-        st.error("Champion model or SHAP explainer not loaded.")
-    else:
-        with st.container():
-            col_c1, col_c2 = st.columns(2)
-
-            with col_c1:
-                st.markdown("#### Customer Attributes")
-                f_contract = st.selectbox("Contract Type", ["Month-to-month", "One year", "Two year"])
-                f_payment = st.selectbox("Payment Method", ["Electronic check", "Mailed check", "Bank transfer (automatic)", "Credit card (automatic)"])
-                f_internet = st.selectbox("Internet Service", ["Fiber optic", "DSL", "No"])
-                f_tenure = st.slider("Tenure (Months)", min_value=1, max_value=72, value=4)
-                f_monthly = st.slider("Monthly Charges", min_value=18.0, max_value=120.0, value=89.5, step=0.5)
-
-                # Supplementary fields to meet schema requirements for prediction
-                f_gender = st.selectbox("Gender", ["Female", "Male"])
-                f_senior = st.selectbox("Senior Citizen", [0, 1])
-                f_partner = st.selectbox("Has Partner", ["Yes", "No"])
-                f_dependents = st.selectbox("Has Dependents", ["No", "Yes"])
-                f_phone = st.selectbox("Phone Service", ["Yes", "No"])
-                f_lines = st.selectbox("Multiple Lines", ["No", "Yes", "No phone service"])
-                f_security = st.selectbox("Online Security", ["No", "Yes", "No internet service"])
-                f_backup = st.selectbox("Online Backup", ["No", "Yes", "No internet service"])
-                f_device_prot = st.selectbox("Device Protection", ["No", "Yes", "No internet service"])
-                f_tech_support = st.selectbox("Tech Support", ["No", "Yes", "No internet service"])
-                f_streaming_tv = st.selectbox("Streaming TV", ["No", "Yes", "No internet service"])
-                f_streaming_movies = st.selectbox("Streaming Movies", ["No", "Yes", "No internet service"])
-                f_paperless = st.selectbox("Paperless Billing", ["Yes", "No"])
-
-            with col_c2:
-                st.markdown("#### Real-Time Inference Output")
-                total_charges_est = round(f_monthly * f_tenure, 2)
-                avg_monthly_spend_est = round(total_charges_est / (f_tenure + 1), 2)
-                contract_risk_score_est = 3 if "month" in f_contract.lower() else (2 if "one" in f_contract.lower() else 1)
-                
-                svc_count = 0
-                if f_phone == "Yes": svc_count += 1
-                if f_lines == "Yes": svc_count += 1
-                if f_internet in ["DSL", "Fiber optic"]: svc_count += 1
-                for v in [f_security, f_backup, f_device_prot, f_tech_support, f_streaming_tv, f_streaming_movies]:
-                    if v == "Yes": svc_count += 1
-                    
-                support_usage = 1 if (f_tech_support == "Yes" or f_security == "Yes" or f_backup == "Yes") else 0
-                premium_flag = 1 if f_monthly > 80.0 else 0
-                long_term_flag = 1 if f_tenure > 36 else 0
-                echeck_risk = 1 if "electronic check" in f_payment.lower() else 0
-                
-                tenure_bucket_val = "New" if f_tenure <= 12 else ("Developing" if f_tenure <= 24 else ("Stable" if f_tenure <= 48 else "Loyal"))
-
-                input_dict = {
-                    "gender": f_gender, "SeniorCitizen": f_senior, "Partner": f_partner, "Dependents": f_dependents,
-                    "PhoneService": f_phone, "MultipleLines": f_lines, "InternetService": f_internet,
-                    "OnlineSecurity": f_security, "OnlineBackup": f_backup, "DeviceProtection": f_device_prot,
-                    "TechSupport": f_tech_support, "StreamingTV": f_streaming_tv, "StreamingMovies": f_streaming_movies,
-                    "Contract": f_contract, "PaperlessBilling": f_paperless, "PaymentMethod": f_payment,
-                    "tenure_bucket": tenure_bucket_val, "tenure": f_tenure, "MonthlyCharges": f_monthly,
-                    "TotalCharges": total_charges_est, "avg_monthly_spend": avg_monthly_spend_est,
-                    "contract_risk_score": contract_risk_score_est, "service_count": svc_count,
-                    "support_usage_indicator": support_usage, "premium_customer_flag": premium_flag,
-                    "long_term_customer_flag": long_term_flag, "electronic_check_risk": echeck_risk
-                }
-
-                input_df = pd.DataFrame([input_dict])
-
-                churn_prob = float(champion_pipeline.predict_proba(input_df)[0, 1])
-
-                churn_pct = churn_prob * 100
-                if churn_pct < 30:
-                    risk_level = "LOW RISK"
-                    gauge_color = "#10b981"
-                elif churn_pct < 60:
-                    risk_level = "MODERATE RISK"
-                    gauge_color = "#f59e0b"
-                else:
-                    risk_level = "HIGH RISK"
-                    gauge_color = "#f43f5e"
-
-                fig_gauge = go.Figure(go.Indicator(
-                    mode="gauge+number",
-                    value=churn_pct,
-                    number={"suffix": "%", "font": {"size": 32, "color": "#ffffff", "family": "Inter, sans-serif"}, "valueformat": ".1f"},
-                    title={"text": f"<b>CHURN RISK DIAL</b><br><span style='color:{gauge_color}; font-size: 14px;'>Status: {risk_level}</span>", "font": {"size": 16, "color": "#94a3b8"}},
-                    gauge={
-                        "axis": {"range": [0, 100], "tickwidth": 1, "tickcolor": "#475569", "tickfont": {"color": "#94a3b8"}},
-                        "bar": {"color": gauge_color, "thickness": 0.3},
-                        "bgcolor": "rgba(15, 23, 42, 0.6)",
-                        "borderwidth": 1,
-                        "bordercolor": "#334155",
-                        "steps": [
-                            {"range": [0, 30], "color": "rgba(16, 185, 129, 0.2)"},
-                            {"range": [30, 60], "color": "rgba(245, 158, 11, 0.2)"},
-                            {"range": [60, 100], "color": "rgba(244, 63, 94, 0.2)"}
-                        ],
-                        "threshold": {
-                            "line": {"color": "#ffffff", "width": 3},
-                            "thickness": 0.8,
-                            "value": churn_pct
-                        }
-                    }
-                ))
-
-                fig_gauge.update_layout(
-                    height=240,
-                    margin=dict(l=25, r=25, t=55, b=10),
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor="rgba(0,0,0,0)",
-                    font={"color": "white"}
-                )
-
-                st.plotly_chart(fig_gauge, use_container_width=True)
-
-                preproc = live_explainer["preprocessor"]
-                explainer = live_explainer["explainer"]
-                readable_names = live_explainer["readable_feature_names"]
-
-                X_single_trans = preproc.transform(input_df)
-                raw_shap = explainer.shap_values(X_single_trans)
-
-                if isinstance(raw_shap, list) and len(raw_shap) == 2:
-                    single_shap = raw_shap[1][0]
-                elif isinstance(raw_shap, np.ndarray) and raw_shap.ndim == 3:
-                    single_shap = raw_shap[0, :, 1]
-                elif isinstance(raw_shap, np.ndarray) and raw_shap.ndim == 2:
-                    single_shap = raw_shap[0]
-                else:
-                    single_shap = raw_shap
-
-                paired_shap = list(zip(readable_names, single_shap))
-                top_contributors = sorted(paired_shap, key=lambda x: abs(x[1]), reverse=True)[:8]
-                top_feats_df = pd.DataFrame(top_contributors, columns=["Feature", "SHAP Impact"])
-                top_feats_df["Impact Direction"] = top_feats_df["SHAP Impact"].apply(lambda v: "Positive Churn" if v > 0 else "Negative Churn")
-                
-                fig_shap_bar = px.bar(
-                    top_feats_df,
-                    x="SHAP Impact",
-                    y="Feature",
-                    orientation='h',
-                    color="Impact Direction",
-                    color_discrete_map={"Positive Churn": "#fb7185", "Negative Churn": "#10b981"},
-                    template="plotly_dark",
-                    height=350
-                )
-                fig_shap_bar.update_layout(yaxis={'categoryorder': 'total ascending'}, plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
-                st.plotly_chart(fig_shap_bar, use_container_width=True)
-
-
-# =========================================================
-# PAGE 6: Batch Prediction
-# =========================================================
-elif page_selection == "Batch Prediction":
-    st.title("Batch Prediction")
-
-    uploaded_file = st.file_uploader("Upload CSV File for Inference", type=["csv"])
-    
-    if uploaded_file is not None:
-        try:
-            batch_df = pd.read_csv(uploaded_file)
-            st.caption(f"Loaded {len(batch_df):,} records.")
+        # Benchmark ROC & Confusion Matrix Figures
+        st.subheader("Comparative Benchmark Visualizations")
+        col_m1, col_m2 = st.columns(2)
+        with col_m1:
+            fig_path = BASE_DIR / "reports" / "figures" / "roc_curves_comparison.png"
+            if fig_path.exists():
+                st.image(str(fig_path), caption="Benchmark ROC Curves Comparison")
             
-            # Incorporating imports locally
-            sys.path.append(str(BASE_DIR))
-            from src.feature_engineering import calculate_service_count, assign_tenure_bucket, get_contract_risk
-            
-            df_scored = batch_df.copy()
-            if "tenure" in df_scored.columns:
-                df_scored["tenure_bucket"] = df_scored["tenure"].apply(assign_tenure_bucket)
-            if "TotalCharges" in df_scored.columns:
-                tc_numeric = pd.to_numeric(df_scored["TotalCharges"].astype(str).str.strip(), errors="coerce")
-                df_scored["TotalCharges"] = tc_numeric.fillna(tc_numeric.median())
-                df_scored["avg_monthly_spend"] = np.round(df_scored["TotalCharges"] / (df_scored["tenure"] + 1.0), 2)
-            if "Contract" in df_scored.columns:
-                df_scored["contract_risk_score"] = df_scored["Contract"].apply(get_contract_risk)
-            df_scored["service_count"] = df_scored.apply(calculate_service_count, axis=1)
-            df_scored["support_usage_indicator"] = df_scored.apply(
-                lambda r: 1 if (str(r.get("TechSupport", "")).lower() == "yes" or str(r.get("OnlineSecurity", "")).lower() == "yes") else 0, axis=1
-            )
-            if "MonthlyCharges" in df_scored.columns:
-                df_scored["premium_customer_flag"] = (df_scored["MonthlyCharges"] > 80.0).astype(int)
-            if "tenure" in df_scored.columns:
-                df_scored["long_term_customer_flag"] = (df_scored["tenure"] > 36).astype(int)
-            if "PaymentMethod" in df_scored.columns:
-                df_scored["electronic_check_risk"] = df_scored["PaymentMethod"].apply(lambda x: 1 if "electronic check" in str(x).lower() else 0)
+        with col_m2:
+            cm_path = BASE_DIR / "reports" / "figures" / "confusion_matrices_comparison.png"
+            if cm_path.exists():
+                st.image(str(cm_path), caption="Confusion Matrices Comparison")
 
-            probs = champion_pipeline.predict_proba(df_scored)[:, 1]
-            batch_df["Churn_Probability"] = np.round(probs, 4)
-            batch_df["Risk_Category"] = np.where(probs >= 0.65, "High", np.where(probs >= 0.35, "Moderate", "Low"))
+        st.markdown("<br>", unsafe_allow_html=True)
 
-            with st.container():
-                st.markdown("### Output Summary Table")
-                cols_to_show = ["customerID", "Churn_Probability", "Risk_Category", "Contract", "MonthlyCharges"]
-                st.dataframe(batch_df[[c for c in cols_to_show if c in batch_df.columns]].head(100), use_container_width=True)
-
-            csv_data = batch_df.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="Export Scored Dataset",
-                data=csv_data,
-                file_name="scored_predictions.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-
-        except Exception as batch_err:
-            st.error(f"Error processing dataset: {batch_err}")
-
-
-# =========================================================
-# PAGE 7: Strategic Insights & Reports
-# =========================================================
-elif page_selection == "Strategic Insights & Reports":
-    st.title("Strategic Insights & Reports")
-
-    with st.container():
-        st.markdown("### Global XAI Summary")
+        # Global SHAP Summary & Detailed Explanations
+        st.subheader("Global Explainable AI (SHAP Macro Insights)")
         col_g1, col_g2 = st.columns(2)
         with col_g1:
             beeswarm_path = BASE_DIR / "reports" / "figures" / "shap_summary_beeswarm.png"
             if beeswarm_path.exists():
-                st.image(str(beeswarm_path), caption="Global SHAP Beeswarm", use_container_width=True)
-                
+                st.image(str(beeswarm_path), caption="Global SHAP Beeswarm Distribution")
         with col_g2:
             bar_path = BASE_DIR / "reports" / "figures" / "shap_feature_importance_bar.png"
             if bar_path.exists():
-                st.image(str(bar_path), caption="Mean |SHAP| Feature Importance", use_container_width=True)
+                st.image(str(bar_path), caption="Mean |SHAP| Global Feature Importance")
 
-    with st.container():
-        st.markdown("### Structured Retention Findings")
-        for rec in eda_data.get("recommendations", []):
-            st.markdown(
-                f"""
-                <div class="insight-box">
-                    <strong style="color: var(--text-primary);">Vulnerability:</strong> <span style="color: var(--text-muted);">{rec.get('finding', '')}</span><br><br>
-                    <strong style="color: var(--text-primary);">Strategy:</strong> <span style="color: var(--text-muted);">{rec.get('action', '')}</span>
+        # Global SHAP Educational Guide Box
+        render_html("""
+        <div style="background: #ffffff; border: 1px solid #f6ded2; border-radius: 14px; padding: 1.4rem 1.6rem; margin-top: 1.25rem; box-shadow: 0 4px 18px rgba(231, 111, 81, 0.05);">
+            <div style="font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #e76f51; margin-bottom: 0.5rem;">
+                Interpreting Global SHAP Explainability &mdash; Population-Level Churn Dynamics
+            </div>
+            <p style="font-size: 0.88rem; color: #4a3b34; line-height: 1.6; margin: 0 0 1rem 0;">
+                While Local SHAP explains an individual customer's prediction, Global SHAP synthesizes the collective decision landscape across all 7,043 enterprise accounts. 
+                It uncovers macroeconomic patterns and operational friction points driving subscriber flight across the company.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.2rem;">
+                <div style="background: #fff8f4; border: 1px solid #fedecd; border-radius: 12px; padding: 1.15rem;">
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #ff6b4a; margin-bottom: 0.4rem;">
+                        1. Global Beeswarm Distribution Plot
+                    </div>
+                    <ul style="padding-left: 1.15rem; margin: 0; font-size: 0.84rem; color: #5a463e; line-height: 1.6;">
+                        <li style="margin-bottom: 0.35rem;"><strong>One Dot = One Subscriber:</strong> Every dot represents one of the 7,043 accounts in the dataset.</li>
+                        <li style="margin-bottom: 0.35rem;"><strong>Horizontal Position (X-Axis):</strong> Dots to the right of zero pushed churn risk HIGHER for that customer; dots to the left pulled risk LOWER.</li>
+                        <li style="margin-bottom: 0.35rem;"><strong>Dot Color (Feature Value):</strong> Red dots indicate high values of that feature (e.g., high monthly bill, long tenure); Blue dots indicate low values.</li>
+                        <li style="margin-bottom: 0.35rem;"><strong>Cluster Thickness:</strong> Bulges in the swarm indicate high customer density at that specific impact level.</li>
+                        <li><strong>Strategic Insight:</strong> Notice how red dots (high charges) cluster heavily on the right side of the plot&mdash;demonstrating that expensive monthly bills universally accelerate flight risk.</li>
+                    </ul>
                 </div>
-                """, unsafe_allow_html=True
-            )
+                <div style="background: #f0fdf9; border: 1px solid #bbf7d0; border-radius: 12px; padding: 1.15rem;">
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #0da371; margin-bottom: 0.4rem;">
+                        2. Mean Absolute |SHAP| Global Feature Ranking
+                    </div>
+                    <ul style="padding-left: 1.15rem; margin: 0; font-size: 0.84rem; color: #2e4a3d; line-height: 1.6;">
+                        <li style="margin-bottom: 0.35rem;"><strong>Mathematical Magnitude:</strong> Measures the mean absolute impact <code>E[|SHAP|]</code> across the entire customer base.</li>
+                        <li style="margin-bottom: 0.35rem;"><strong>Top-to-Bottom Importance:</strong> Features at the top have the largest global influence on whether accounts stay or churn.</li>
+                        <li style="margin-bottom: 0.35rem;"><strong>Unbiased vs Traditional Gini:</strong> Unlike standard Random Forest feature importance (which unfairly favors high-cardinality continuous numbers), SHAP guarantees mathematical consistency and efficiency.</li>
+                        <li><strong>Strategic Insight:</strong> Contract terms, Monthly Charges, and Fiber Optic Internet are the top 3 structural catalysts of churn across the entire enterprise.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        """)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # Storage & Schema Tab
+        st.subheader("Distributed Storage & Schema Governance")
+        tab_storage, tab_schema = st.tabs(["HDFS Parquet Lake Architecture", "Feature Data Dictionary"])
+        
+        with tab_storage:
+            st.code("""
+data/hdfs_simulation/warehouse/telco/
+|-- Contract=Month-to-month/
+|   `-- part-00000.parquet
+|-- Contract=One year/
+|   `-- part-00001.parquet
+`-- Contract=Two year/
+    `-- part-00002.parquet
+            """, language="text")
+            st.caption("Partitioned by contract commitment to optimize predicate pushdown and column projection in Spark queries.")
+
+        with tab_schema:
+            if not df_sample.empty:
+                dtype_df = pd.DataFrame({
+                    "Attribute Column": df_sample.columns,
+                    "Data Type": [str(t) for t in df_sample.dtypes],
+                    "Distinct Values": [df_sample[c].nunique() for c in df_sample.columns],
+                    "Null Count": [df_sample[c].isna().sum() for c in df_sample.columns]
+                })
+                st.dataframe(dtype_df, width="stretch")
+
+    else:
+        st.warning("Model evaluation metrics not found.")
