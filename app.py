@@ -500,9 +500,47 @@ li[data-baseweb="menu-item"]:hover {
     background: linear-gradient(135deg, #ffffff 0%, #fff5ee 55%, #ffebe0 100%);
     border: 1px solid #fed8c5;
     border-radius: 16px;
-    padding: 1.5rem 1.75rem;
+    padding: 1.4rem 1.75rem;
     box-shadow: 0 6px 24px rgba(231, 111, 81, 0.08);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+/* Top Right Page Info Popover Styling */
+[data-testid="stPopover"] {
+    width: 100% !important;
+}
+
+[data-testid="stPopover"] button {
+    background: linear-gradient(135deg, #ffffff 0%, #fff8f4 100%) !important;
+    border: 1.5px solid #fed8c5 !important;
+    color: #e76f51 !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    border-radius: 10px !important;
+    padding: 0.55rem 0.85rem !important;
+    box-shadow: 0 2px 8px rgba(231, 111, 81, 0.08) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    letter-spacing: 0.02em !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+[data-testid="stPopover"] button:hover {
+    background: #fff2eb !important;
+    border-color: #f4a261 !important;
+    color: #b72a00 !important;
+    box-shadow: 0 4px 16px rgba(231, 111, 81, 0.18) !important;
+    transform: translateY(-1px) !important;
+}
+
+[data-testid="stPopoverBody"] {
+    border-radius: 14px !important;
+    border: 1.5px solid #fed8c5 !important;
+    box-shadow: 0 12px 40px rgba(231, 111, 81, 0.16) !important;
+    background: #fefbf8 !important;
+    padding: 1rem 1.15rem !important;
+    max-width: 480px !important;
 }
 
 .metric-card-peach {
@@ -705,6 +743,76 @@ def render_metric_card(
     """
 
 
+def render_page_header_with_info(
+    page_title: str,
+    category_subtitle: str,
+    description: str,
+    purpose: str,
+    what_it_tells: List[str],
+    how_it_works: str,
+    action_protocol: str
+) -> None:
+    col_hero, col_info = st.columns([3.85, 1.15])
+    with col_hero:
+        render_html(f"""
+        <div class="card-hero-peach" style="margin-bottom: 1.25rem;">
+            <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e76f51; margin-bottom: 0.35rem;">
+                {category_subtitle}
+            </div>
+            <h1 style="font-size: 2.15rem; margin: 0; color: #1a120e; letter-spacing: -0.025em; line-height: 1.2;">
+                {page_title}
+            </h1>
+            <p style="color: #6d5a52; font-size: 0.96rem; margin-top: 0.45rem; line-height: 1.5; margin-bottom: 0;">
+                {description}
+            </p>
+        </div>
+        """)
+    with col_info:
+        st.markdown("<div style='height: 0.35rem;'></div>", unsafe_allow_html=True)
+        with st.popover("Page Guide & Info", width="stretch"):
+            list_items_html = "".join([f"<li style='margin-bottom: 0.4rem;'>{item}</li>" for item in what_it_tells])
+            render_html(f"""
+            <div style="padding: 0.25rem 0.1rem; font-family: 'Plus Jakarta Sans', sans-serif;">
+                <div style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #e76f51; margin-bottom: 0.2rem;">
+                    Platform Documentation
+                </div>
+                <h3 style="margin: 0 0 0.85rem 0; font-size: 1.12rem; color: #1a120e; font-weight: 800; letter-spacing: -0.02em;">
+                    {page_title}
+                </h3>
+                
+                <div style="background: #fff8f4; border: 1px solid #fed8c5; border-radius: 9px; padding: 0.75rem 0.85rem; margin-bottom: 0.75rem;">
+                    <strong style="color: #d84315; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 0.3rem;">
+                        Core Purpose & Scope
+                    </strong>
+                    <div style="font-size: 0.84rem; color: #3b2c25; line-height: 1.45;">
+                        {purpose}
+                    </div>
+                </div>
+
+                <div style="background: #ffffff; border: 1px solid #f6ded2; border-radius: 9px; padding: 0.75rem 0.85rem; margin-bottom: 0.75rem;">
+                    <strong style="color: #261914; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 0.35rem;">
+                        Information Provided
+                    </strong>
+                    <ul style="font-size: 0.82rem; color: #5a4840; margin: 0; padding-left: 1.1rem; line-height: 1.45;">
+                        {list_items_html}
+                    </ul>
+                </div>
+
+                <div style="background: #ffffff; border: 1px solid #f6ded2; border-radius: 9px; padding: 0.75rem 0.85rem; margin-bottom: 0.25rem;">
+                    <strong style="color: #261914; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 0.35rem;">
+                        Methodology & Operational Protocol
+                    </strong>
+                    <div style="font-size: 0.82rem; color: #5a4840; line-height: 1.45; margin-bottom: 0.5rem;">
+                        {how_it_works}
+                    </div>
+                    <div style="border-top: 1px dashed #fed8c5; padding-top: 0.45rem; font-size: 0.8rem; color: #6d5b52;">
+                        <strong style="color: #0da371;">Action Protocol:</strong> {action_protocol}
+                    </div>
+                </div>
+            </div>
+            """)
+
+
 # ---------------------------------------------------------
 # Cached Data Loaders
 # ---------------------------------------------------------
@@ -833,20 +941,20 @@ with st.sidebar:
 # PAGE 1: Executive Overview
 # =========================================================
 if page_selection == "Executive Overview":
-    render_html("""
-    <div class="card-hero-peach">
-        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e76f51; margin-bottom: 0.35rem;">
-            Enterprise Telemetry & Strategic Briefing
-        </div>
-        <h1 style="font-size: 2.3rem; margin: 0; color: #1a120e;">
-            Executive Overview & Revenue Exposure
-        </h1>
-        <p style="color: #6d5a52; font-size: 1rem; margin-top: 0.4rem; max-width: 900px; line-height: 1.5;">
-            High-throughput analytics monitoring subscriber health across 7,043 enterprise accounts. 
-            Identifies annualized revenue at risk and operational churn catalysts before cancellation occurs.
-        </p>
-    </div>
-    """)
+    render_page_header_with_info(
+        page_title="Executive Overview & Revenue Exposure",
+        category_subtitle="Enterprise Telemetry & Strategic Briefing",
+        description="High-throughput analytics monitoring subscriber health across 7,043 enterprise accounts. Identifies annualized revenue at risk and operational churn catalysts before cancellation occurs.",
+        purpose="Monitors macroscopic portfolio health, quantifies bottom-line financial exposure, and uncovers institutional churn catalysts across the entire contracted subscriber base.",
+        what_it_tells=[
+            "Total active contracted accounts (7,043) and portfolio baseline churn rate (26.54%).",
+            "Monthly recurring revenue exposed to churn ($139,130/mo, representing 30.5% of gross revenue).",
+            "Distribution of risk across contract types, tenure velocity, payment methods, and internet infrastructure.",
+            "Production champion model validation performance (ROC-AUC 0.8464)."
+        ],
+        how_it_works="Aggregates verified enterprise telemetry and cross-validated PySpark MLlib inferences across all customer accounts. Evaluates feature correlations against historical attrition benchmarks to surface early warning indicators.",
+        action_protocol="Mandate contract extension incentives for accounts in months 1-12, initiate billing migration away from electronic checks, and prioritize fiber-optic service stability audits."
+    )
 
     kpis = eda_data.get("kpis", {})
     best_auc = model_eval.get("best_metrics", {}).get("ROC_AUC", 0.8464)
@@ -1022,20 +1130,20 @@ if page_selection == "Executive Overview":
 # PAGE 2: Customer Intelligence & XAI
 # =========================================================
 elif page_selection == "Customer Intelligence & XAI":
-    render_html("""
-    <div class="card-hero-peach">
-        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e76f51; margin-bottom: 0.35rem;">
-            Real-Time Scoring & Local Interpretability
-        </div>
-        <h1 style="font-size: 2.3rem; margin: 0; color: #1a120e;">
-            Customer Intelligence & Explainability
-        </h1>
-        <p style="color: #6d5a52; font-size: 1rem; margin-top: 0.4rem; max-width: 900px; line-height: 1.5;">
-            Input or modify individual subscriber parameters to receive immediate churn probability scoring 
-            paired with game-theoretic SHAP feature attributions that explain exactly why the customer intends to stay or depart.
-        </p>
-    </div>
-    """)
+    render_page_header_with_info(
+        page_title="Customer Intelligence & Explainability",
+        category_subtitle="Real-Time Scoring & Local Interpretability",
+        description="Input or modify individual subscriber parameters to receive immediate churn probability scoring paired with game-theoretic SHAP feature attributions that explain exactly why the customer intends to stay or depart.",
+        purpose="Provides frontline customer success teams and retention specialists with real-time, transparent risk diagnostics for individual accounts, eliminating 'black-box' guessing.",
+        what_it_tells=[
+            "Calibrated churn probability score and safety classification (Safe <30%, Moderate 30-60%, Critical >60%).",
+            "Exact additive SHAP value contributions for every customer feature (tenure, contract, payment method, monthly charges, add-on services).",
+            "Top 3 risk catalysts pushing probability UP vs top 3 mitigating anchors keeping probability DOWN.",
+            "Visual waterfall/bar attributions indicating the magnitude and direction of every lever."
+        ],
+        how_it_works="Passes subscriber attributes through the champion Gradient Boosted Trees model. The TreeSHAP engine computes exact Shapley values derived from cooperative game theory, ensuring that the sum of feature attributions equals the difference between model output and expected baseline.",
+        action_protocol="Use the top 3 risk catalysts during retention outreach to address the precise root causes (e.g. bundling tech support or converting to an annual term) rather than offering arbitrary blanket discounts."
+    )
 
     if champion_pipeline is None or live_explainer is None:
         st.error("Champion model or SHAP explainer artifacts could not be loaded.")
@@ -1247,20 +1355,20 @@ elif page_selection == "Customer Intelligence & XAI":
 # PAGE 3: Prescriptive AI & Retention
 # =========================================================
 elif page_selection == "Prescriptive AI & Retention":
-    render_html("""
-    <div class="card-hero-peach">
-        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e76f51; margin-bottom: 0.35rem;">
-            Algorithmic Recourse & Prescriptive Intelligence
-        </div>
-        <h1 style="font-size: 2.3rem; margin: 0; color: #1a120e;">
-            Prescriptive Counterfactual Retention Engine
-        </h1>
-        <p style="color: #6d5a52; font-size: 1rem; margin-top: 0.4rem; max-width: 900px; line-height: 1.5;">
-            Moving beyond passive prediction. This engine formulates minimal-cost actionable counterfactual interventions 
-            (Wachter framework) to calculate the precise commercial offers that flip high-risk subscribers into loyal accounts with proven ROI.
-        </p>
-    </div>
-    """)
+    render_page_header_with_info(
+        page_title="Prescriptive Counterfactual Retention Engine",
+        category_subtitle="Algorithmic Recourse & Prescriptive Intelligence",
+        description="Moving beyond passive prediction. This engine formulates minimal-cost actionable counterfactual interventions (Wachter framework) to calculate the precise commercial offers that flip high-risk subscribers into loyal accounts with proven ROI.",
+        purpose="Transforms diagnostic predictions into prescriptive, cost-optimized business interventions that mathematically guarantee account retention while maximizing preserved enterprise revenue.",
+        what_it_tells=[
+            "Standardized enterprise retention packages with simulated risk reduction and net preserved annual revenue ($/yr).",
+            "Dual interactive gauges demonstrating Before-Intervention vs After-Intervention churn probability in real time.",
+            "Algorithmic Recourse Optimizer calculating the minimal-effort feature adjustments required to achieve an account safety threshold (<30%).",
+            "Economic trade-off analysis comparing implementation costs against preserved lifetime contract value."
+        ],
+        how_it_works="Formulates recourse as an optimization problem: minimizing the distance between the original account profile and candidate counterfactual states subject to model score constraints. Mutable levers (contracts, discounts, add-on services) are explored while immutable traits (gender, senior citizen, tenure) remain locked.",
+        action_protocol="Deploy the pre-approved retention package yielding the highest net ROI, or execute the minimal counterfactual recourse package during contract renegotiations."
+    )
 
     if champion_pipeline is None:
         st.error("Champion model pipeline not loaded.")
@@ -1571,20 +1679,20 @@ elif page_selection == "Prescriptive AI & Retention":
 # PAGE 4: Portfolio Cohort Matrix
 # =========================================================
 elif page_selection == "Portfolio Cohort Matrix":
-    render_html("""
-    <div class="card-hero-peach">
-        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e76f51; margin-bottom: 0.35rem;">
-            Batch Scoring & Resource Allocation
-        </div>
-        <h1 style="font-size: 2.3rem; margin: 0; color: #1a120e;">
-            Portfolio Cohort Matrix & Budget Optimizer
-        </h1>
-        <p style="color: #6d5a52; font-size: 1rem; margin-top: 0.4rem; max-width: 900px; line-height: 1.5;">
-            Score subscriber cohorts to partition accounts into the 4-Quadrant Strategic Resource Allocation Matrix. 
-            Optimizes retention team capacity by separating high-touch targets from automated and cost-sensitive segments.
-        </p>
-    </div>
-    """)
+    render_page_header_with_info(
+        page_title="Portfolio Cohort Matrix & Budget Optimizer",
+        category_subtitle="Batch Scoring & Resource Allocation",
+        description="Score subscriber cohorts to partition accounts into the 4-Quadrant Strategic Resource Allocation Matrix. Optimizes retention team capacity by separating high-touch targets from automated and cost-sensitive segments.",
+        purpose="Enables operational leaders and retention directors to batch-score thousands of accounts simultaneously and allocate retention personnel and capital with mathematical efficiency.",
+        what_it_tells=[
+            "4-Quadrant segmentation mapping accounts across Predicted Churn Risk (X-axis) and Monthly Charges (Y-axis).",
+            "High-Touch Retention Targets (High Risk, High MRR) vs Automated Digital Nudges (High Risk, Low MRR).",
+            "Cost-Sensitive Intervention accounts (Low Risk, High MRR) vs Organic Loyalty monitoring (Low Risk, Low MRR).",
+            "Exportable CSV dataset containing calibrated risk probabilities, assigned quadrants, and prescribed operational strategies."
+        ],
+        how_it_works="Executes batch vector inference across the uploaded or benchmark cohort, evaluates business thresholds (default 50% risk threshold, $70/mo MRR boundary), and tags each account with specialized operational protocols.",
+        action_protocol="Export the prescribed CSV cohort directly into your CRM (Salesforce/HubSpot) to route high-touch targets to senior account executives and trigger automated renewal email workflows for low-MRR accounts."
+    )
 
     if champion_pipeline is None:
         st.error("Champion model not loaded.")
@@ -1726,20 +1834,20 @@ elif page_selection == "Portfolio Cohort Matrix":
 # PAGE 5: Model Benchmarks & Data Governance
 # =========================================================
 elif page_selection == "Model Benchmarks & Data":
-    render_html("""
-    <div class="card-hero-peach">
-        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e76f51; margin-bottom: 0.35rem;">
-            Empirical Validation & Data Lake Architecture
-        </div>
-        <h1 style="font-size: 2.3rem; margin: 0; color: #1a120e;">
-            Model Benchmarks & Data Governance
-        </h1>
-        <p style="color: #6d5a52; font-size: 1rem; margin-top: 0.4rem; max-width: 900px; line-height: 1.5;">
-            Rigorous cross-validation benchmarks comparing Scikit-Learn and Apache Spark MLlib candidate architectures, 
-            paired with simulated HDFS Parquet storage partitions and global SHAP interpretability.
-        </p>
-    </div>
-    """)
+    render_page_header_with_info(
+        page_title="Model Benchmarks & Data Governance",
+        category_subtitle="Empirical Validation & Data Lake Architecture",
+        description="Rigorous cross-validation benchmarks comparing Scikit-Learn and Apache Spark MLlib candidate architectures, paired with simulated HDFS Parquet storage partitions and global SHAP interpretability.",
+        purpose="Serves as the data science audit, architectural verification, and regulatory compliance center for ML pipelines, enterprise storage, and model governance.",
+        what_it_tells=[
+            "Comparative model leaderboard benchmarking Gradient Boosted Trees, Random Forest, Logistic Regression, and Spark MLlib across Accuracy, Precision, Recall, F1, ROC-AUC, and PR-AUC.",
+            "Empirical evidence justifying the GBT champion model's superiority in isolating high-order non-linear feature interactions.",
+            "Global SHAP feature importance rankings validating domain parity across the entire 7,043 subscriber cohort.",
+            "Simulated HDFS Parquet data lake partition hierarchy, schema metadata, and null-integrity audit."
+        ],
+        how_it_works="Evaluates models on stratified holdout test partitions using identical preprocessing pipelines. Inspects Parquet schema types and null counts to confirm ETL pipeline data hygiene.",
+        action_protocol="MLOps engineers and compliance officers audit model calibration, monitor feature distributions for data drift, and ensure algorithmic fairness before production redeployments."
+    )
 
     metrics_list = model_eval.get("metrics_summary", [])
     if metrics_list:
