@@ -259,35 +259,55 @@ button[data-testid="stSidebarCollapseButton"] {
     box-sizing: border-box !important;
 }
 
-/* When minimized: card is a neat 46px square showing ONLY the symbol */
+/* When minimized: option wrappers and cards are 46px square showing ONLY the symbol */
+[data-testid="stSidebar"]:not(:hover) div[role="radiogroup"] > * {
+    width: 46px !important;
+    max-width: 46px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+}
+
 [data-testid="stSidebar"]:not(:hover) div[role="radiogroup"] label {
     width: 46px !important;
     min-width: 46px !important;
     max-width: 46px !important;
     height: 46px !important;
     padding: 0 !important;
+    margin: 0 auto !important;
     justify-content: center !important;
-    margin-left: 2px !important;
+    align-items: center !important;
     overflow: hidden !important;
 }
 
-/* When minimized: hide all internal contents of the radio option (circles, text, captions) */
-[data-testid="stSidebar"]:not(:hover) [data-testid="stRadio"] [data-testid="stRadioOption"] {
+/* When minimized: hide ONLY the text label, keeping the symbol badge fully visible */
+[data-testid="stSidebar"]:not(:hover) [data-testid="stRadio"] [data-testid="stMarkdownContainer"] {
     display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
 }
 
 /* When hovered: card expands to full width with comfortable padding */
+[data-testid="stSidebar"]:hover div[role="radiogroup"] > * {
+    width: 100% !important;
+}
+
 [data-testid="stSidebar"]:hover div[role="radiogroup"] label {
     width: 100% !important;
     padding: 6px 12px !important;
     justify-content: flex-start !important;
+    align-items: center !important;
 }
 
 /* When hovered: show the text container right next to the symbol */
-[data-testid="stSidebar"]:hover [data-testid="stRadio"] [data-testid="stRadioOption"] {
-    display: flex !important;
-    align-items: center !important;
-    margin-left: 8px !important;
+[data-testid="stSidebar"]:hover [data-testid="stRadio"] [data-testid="stMarkdownContainer"] {
+    display: block !important;
+    visibility: visible !important;
+    animation: fadeInText 0.22s ease !important;
+    margin-left: 10px !important;
 }
 
 /* Illustrated Symbol Badge for each page item */
@@ -685,27 +705,37 @@ h4 {
 icons_css = f"""
 <style>
 /* Option 1: Executive Overview */
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(1)::before {{
+[data-testid="stSidebar"] div[role="radiogroup"] > *:nth-child(1) label::before,
+[data-testid="stSidebar"] [data-testid="stRadioGroup"] > *:nth-child(1) label::before,
+[data-testid="stSidebar"] label:has(input[value="0"])::before {{
     background-image: url('data:image/png;base64,{b64_exec}') !important;
 }}
 
 /* Option 2: Customer Intelligence & XAI */
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(2)::before {{
+[data-testid="stSidebar"] div[role="radiogroup"] > *:nth-child(2) label::before,
+[data-testid="stSidebar"] [data-testid="stRadioGroup"] > *:nth-child(2) label::before,
+[data-testid="stSidebar"] label:has(input[value="1"])::before {{
     background-image: url('data:image/png;base64,{b64_intel}') !important;
 }}
 
 /* Option 3: Prescriptive AI & Retention */
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(3)::before {{
+[data-testid="stSidebar"] div[role="radiogroup"] > *:nth-child(3) label::before,
+[data-testid="stSidebar"] [data-testid="stRadioGroup"] > *:nth-child(3) label::before,
+[data-testid="stSidebar"] label:has(input[value="2"])::before {{
     background-image: url('data:image/png;base64,{b64_presc}') !important;
 }}
 
 /* Option 4: Portfolio Cohort Matrix */
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(4)::before {{
+[data-testid="stSidebar"] div[role="radiogroup"] > *:nth-child(4) label::before,
+[data-testid="stSidebar"] [data-testid="stRadioGroup"] > *:nth-child(4) label::before,
+[data-testid="stSidebar"] label:has(input[value="3"])::before {{
     background-image: url('data:image/png;base64,{b64_cohort}') !important;
 }}
 
 /* Option 5: Model Benchmarks & Data */
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(5)::before {{
+[data-testid="stSidebar"] div[role="radiogroup"] > *:nth-child(5) label::before,
+[data-testid="stSidebar"] [data-testid="stRadioGroup"] > *:nth-child(5) label::before,
+[data-testid="stSidebar"] label:has(input[value="4"])::before {{
     background-image: url('data:image/png;base64,{b64_bench}') !important;
 }}
 </style>
