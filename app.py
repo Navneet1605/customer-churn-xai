@@ -255,14 +255,14 @@ button[data-testid="stSidebarCollapseButton"] {
     display: flex !important;
     align-items: center !important;
     box-shadow: 0 1px 4px rgba(231, 111, 81, 0.04) !important;
-    min-height: 46px !important;
+    min-height: 48px !important;
     box-sizing: border-box !important;
 }
 
-/* When minimized: option wrappers and cards are 46px square showing ONLY the symbol */
+/* When minimized: option wrappers and cards are 48px square showing ONLY the symbol */
 [data-testid="stSidebar"]:not(:hover) div[role="radiogroup"] > * {
-    width: 46px !important;
-    max-width: 46px !important;
+    width: 48px !important;
+    max-width: 48px !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
@@ -270,10 +270,10 @@ button[data-testid="stSidebarCollapseButton"] {
 }
 
 [data-testid="stSidebar"]:not(:hover) div[role="radiogroup"] label {
-    width: 46px !important;
-    min-width: 46px !important;
-    max-width: 46px !important;
-    height: 46px !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    height: 48px !important;
     padding: 0 !important;
     margin: 0 auto !important;
     justify-content: center !important;
@@ -316,17 +316,17 @@ button[data-testid="stSidebarCollapseButton"] {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    min-width: 36px !important;
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 9px !important;
+    min-width: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
     background-color: #ffffff !important;
-    border: 1px solid #f2dbcf !important;
+    border: 1.5px solid #f2dbcf !important;
     flex-shrink: 0 !important;
     transition: all 0.2s ease !important;
     background-repeat: no-repeat !important;
     background-position: center !important;
-    background-size: 26px 26px !important;
+    background-size: 32px 32px !important;
     box-shadow: 0 1px 4px rgba(231, 111, 81, 0.06) !important;
 }
 
@@ -552,6 +552,20 @@ li[data-baseweb="menu-item"]:hover {
     color: #b72a00 !important;
     box-shadow: 0 4px 16px rgba(231, 111, 81, 0.18) !important;
     transform: translateY(-1px) !important;
+}
+
+/* Suppress broken expand_more ligature text from Streamlit popover button */
+[data-testid="stPopover"] button span:not([data-testid="stMarkdownContainer"] *),
+[data-testid="stPopover"] button .material-symbols-rounded,
+[data-testid="stPopover"] button .material-symbols-outlined,
+[data-testid="stPopover"] button [class*="material-symbols"],
+[data-testid="stPopover"] button > svg {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    font-size: 0 !important;
+    opacity: 0 !important;
 }
 
 [data-testid="stPopoverBody"] {
@@ -917,8 +931,8 @@ df_sample = load_processed_sample_data()
 with st.sidebar:
     render_html(f"""
     <div style="display: flex; align-items: center; gap: 12px; padding: 0.25rem 0 1.25rem 0; border-bottom: 1px solid #f6ded2; margin-bottom: 1.25rem;">
-        <div style="min-width: 44px; width: 44px; height: 44px; border-radius: 11px; background: #ffffff; border: 1.5px solid #fed8c5; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(231, 111, 81, 0.12); flex-shrink: 0; padding: 4px; box-sizing: border-box;">
-            <img src="data:image/png;base64,{b64_logo}" style="width: 100%; height: 100%; object-fit: contain;" alt="Logo" />
+        <div style="min-width: 48px; width: 48px; height: 48px; border-radius: 12px; background: #ffffff; border: 1.5px solid #fed8c5; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(231, 111, 81, 0.14); flex-shrink: 0; padding: 2px; box-sizing: border-box;">
+            <img src="data:image/png;base64,{b64_logo}" style="width: 42px; height: 42px; object-fit: contain;" alt="Logo" />
         </div>
         <div class="sidebar-brand-text" style="overflow: hidden; white-space: nowrap;">
             <div style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #e76f51; line-height: 1.2;">
