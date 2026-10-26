@@ -44,6 +44,7 @@ b64_intel = load_asset_b64("Customer Intelligence & XAI.png")
 b64_presc = load_asset_b64("Prescriptive AI & Retention.png")
 b64_cohort = load_asset_b64("Portfolio Cohort Matrix.png")
 b64_bench = load_asset_b64("Model Benchmarks & Data.png")
+b64_logo = load_asset_b64("logo_ui.png") or load_asset_b64("logo.png")
 
 from src.prescriptive_engine import (
     compute_derived_features,
@@ -776,10 +777,10 @@ df_sample = load_processed_sample_data()
 # Sidebar Navigation & Hover System Telemetry
 # ---------------------------------------------------------
 with st.sidebar:
-    render_html("""
+    render_html(f"""
     <div style="display: flex; align-items: center; gap: 12px; padding: 0.25rem 0 1.25rem 0; border-bottom: 1px solid #f6ded2; margin-bottom: 1.25rem;">
-        <div style="min-width: 42px; width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, #e76f51 0%, #d85c3e 100%); display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 800; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(231, 111, 81, 0.35); flex-shrink: 0;">
-            CI
+        <div style="min-width: 44px; width: 44px; height: 44px; border-radius: 11px; background: #ffffff; border: 1.5px solid #fed8c5; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(231, 111, 81, 0.12); flex-shrink: 0; padding: 4px; box-sizing: border-box;">
+            <img src="data:image/png;base64,{b64_logo}" style="width: 100%; height: 100%; object-fit: contain;" alt="Logo" />
         </div>
         <div class="sidebar-brand-text" style="overflow: hidden; white-space: nowrap;">
             <div style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #e76f51; line-height: 1.2;">
