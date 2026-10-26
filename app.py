@@ -29,6 +29,22 @@ import plotly.graph_objects as go
 BASE_DIR = Path(__file__).resolve().parent
 sys.path.append(str(BASE_DIR))
 
+import base64
+
+def load_asset_b64(filename: str) -> str:
+    path = BASE_DIR / "assets" / filename
+    if not path.exists():
+        path = Path(r"C:\Users\dwijn\Big Data\assets") / filename
+    if path.exists():
+        return base64.b64encode(path.read_bytes()).decode("utf-8")
+    return ""
+
+b64_exec = load_asset_b64("Executive Overview.png")
+b64_intel = load_asset_b64("Customer Intelligence & XAI.png")
+b64_presc = load_asset_b64("Prescriptive AI & Retention.png")
+b64_cohort = load_asset_b64("Portfolio Cohort Matrix.png")
+b64_bench = load_asset_b64("Model Benchmarks & Data.png")
+
 from src.prescriptive_engine import (
     compute_derived_features,
     simulate_intervention,
@@ -203,9 +219,28 @@ button[data-testid="stSidebarCollapseButton"] {
     margin-top: 0.5rem !important;
 }
 
-/* Hide default native small radio circle */
-[data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child {
+/* ---------------------------------------------------------
+   Completely remove default Streamlit radio circles & dots
+--------------------------------------------------------- */
+[data-testid="stSidebar"] [data-testid="stRadio"] [data-testid="stRadioOption"] > div > div:first-child,
+[data-testid="stSidebar"] [data-testid="stRadio"] div[class*="e1mpz0hj4"],
+[data-testid="stSidebar"] [data-testid="stRadio"] div[class*="e1mpz0hj5"],
+[data-testid="stSidebar"] [data-testid="stRadio"] input[type="radio"],
+[data-testid="stSidebar"] [data-testid="stRadio"] label > div:first-child:not([data-testid="stRadioOption"]),
+[data-testid="stSidebar"] [data-testid="stRadio"] [data-baseweb="radio"] > div:first-child {
     display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
 }
 
 /* Radio Option Card Base */
@@ -219,27 +254,42 @@ button[data-testid="stSidebarCollapseButton"] {
     display: flex !important;
     align-items: center !important;
     box-shadow: 0 1px 4px rgba(231, 111, 81, 0.04) !important;
-    min-height: 44px !important;
+    min-height: 46px !important;
+    box-sizing: border-box !important;
 }
 
-/* When minimized: card shrinks to a neat 46px square icon container */
+/* When minimized: card is a neat 46px square showing ONLY the symbol */
 [data-testid="stSidebar"]:not(:hover) div[role="radiogroup"] label {
     width: 46px !important;
     min-width: 46px !important;
+    max-width: 46px !important;
     height: 46px !important;
     padding: 0 !important;
     justify-content: center !important;
     margin-left: 2px !important;
+    overflow: hidden !important;
+}
+
+/* When minimized: hide all internal contents of the radio option (circles, text, captions) */
+[data-testid="stSidebar"]:not(:hover) [data-testid="stRadio"] [data-testid="stRadioOption"] {
+    display: none !important;
 }
 
 /* When hovered: card expands to full width with comfortable padding */
 [data-testid="stSidebar"]:hover div[role="radiogroup"] label {
     width: 100% !important;
-    padding: 8px 12px !important;
+    padding: 6px 12px !important;
     justify-content: flex-start !important;
 }
 
-/* Basic Symbol Badge for each page item */
+/* When hovered: show the text container right next to the symbol */
+[data-testid="stSidebar"]:hover [data-testid="stRadio"] [data-testid="stRadioOption"] {
+    display: flex !important;
+    align-items: center !important;
+    margin-left: 8px !important;
+}
+
+/* Illustrated Symbol Badge for each page item */
 [data-testid="stSidebar"] div[role="radiogroup"] label::before {
     content: '' !important;
     display: flex !important;
@@ -249,38 +299,14 @@ button[data-testid="stSidebarCollapseButton"] {
     width: 36px !important;
     height: 36px !important;
     border-radius: 9px !important;
-    background-color: #fff8f4 !important;
-    border: 1px solid #fed8c5 !important;
+    background-color: #ffffff !important;
+    border: 1px solid #f2dbcf !important;
     flex-shrink: 0 !important;
     transition: all 0.2s ease !important;
     background-repeat: no-repeat !important;
     background-position: center !important;
-    background-size: 19px 19px !important;
-}
-
-/* Symbol 1: Executive Overview (Bar chart / telemetry) */
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(1)::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23e76f51' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='20' x2='18' y2='10'%3E%3C/line%3E%3Cline x1='12' y1='20' x2='12' y2='4'%3E%3C/line%3E%3Cline x1='6' y1='20' x2='6' y2='14'%3E%3C/line%3E%3C/svg%3E") !important;
-}
-
-/* Symbol 2: Customer Intelligence & XAI (User diagnostic radar) */
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(2)::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23e76f51' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E") !important;
-}
-
-/* Symbol 3: Prescriptive AI & Retention (Target recourse optimizer) */
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(3)::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%230da371' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Ccircle cx='12' cy='12' r='6'%3E%3C/circle%3E%3Ccircle cx='12' cy='12' r='2'%3E%3C/circle%3E%3C/svg%3E") !important;
-}
-
-/* Symbol 4: Portfolio Cohort Matrix (2x2 Matrix Grid) */
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(4)::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23f4a261' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7'%3E%3C/rect%3E%3Crect x='14' y='3' width='7' height='7'%3E%3C/rect%3E%3Crect x='14' y='14' width='7' height='7'%3E%3C/rect%3E%3Crect x='3' y='14' width='7' height='7'%3E%3C/rect%3E%3C/svg%3E") !important;
-}
-
-/* Symbol 5: Model Benchmarks & Data (Server Lake Architecture) */
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(5)::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236d5b52' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cellipse cx='12' cy='5' rx='9' ry='3'%3E%3C/ellipse%3E%3Cpath d='M21 12c0 1.66-4 3-9 3s-9-1.34-9-3'%3E%3C/path%3E%3Cpath d='M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5'%3E%3C/path%3E%3C/svg%3E") !important;
+    background-size: 26px 26px !important;
+    box-shadow: 0 1px 4px rgba(231, 111, 81, 0.06) !important;
 }
 
 /* Card hover glow */
@@ -289,6 +315,11 @@ button[data-testid="stSidebarCollapseButton"] {
     border-color: #f4a261 !important;
     transform: translateX(3px) !important;
     box-shadow: 0 4px 14px rgba(231, 111, 81, 0.14) !important;
+}
+
+[data-testid="stSidebar"] div[role="radiogroup"] label:hover::before {
+    border-color: #f4a261 !important;
+    box-shadow: 0 2px 8px rgba(244, 162, 97, 0.25) !important;
 }
 
 [data-testid="stSidebar"] div[role="radiogroup"] label:hover p,
@@ -305,26 +336,10 @@ button[data-testid="stSidebarCollapseButton"] {
 }
 
 [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)::before {
-    background-color: #e76f51 !important;
-    border-color: #e76f51 !important;
-    box-shadow: 0 2px 8px rgba(231, 111, 81, 0.35) !important;
-}
-
-/* Selected state white icon overrides */
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(1):has(input:checked)::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='20' x2='18' y2='10'%3E%3C/line%3E%3Cline x1='12' y1='20' x2='12' y2='4'%3E%3C/line%3E%3Cline x1='6' y1='20' x2='6' y2='14'%3E%3C/line%3E%3C/svg%3E") !important;
-}
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(2):has(input:checked)::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E") !important;
-}
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(3):has(input:checked)::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Ccircle cx='12' cy='12' r='6'%3E%3C/circle%3E%3Ccircle cx='12' cy='12' r='2'%3E%3C/circle%3E%3C/svg%3E") !important;
-}
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(4):has(input:checked)::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7'%3E%3C/rect%3E%3Crect x='14' y='3' width='7' height='7'%3E%3C/rect%3E%3Crect x='14' y='14' width='7' height='7'%3E%3C/rect%3E%3Crect x='3' y='14' width='7' height='7'%3E%3C/rect%3E%3C/svg%3E") !important;
-}
-[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(5):has(input:checked)::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cellipse cx='12' cy='5' rx='9' ry='3'%3E%3C/ellipse%3E%3Cpath d='M21 12c0 1.66-4 3-9 3s-9-1.34-9-3'%3E%3C/path%3E%3Cpath d='M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5'%3E%3C/path%3E%3C/svg%3E") !important;
+    background-color: #ffffff !important;
+    border: 2px solid #e76f51 !important;
+    box-shadow: 0 2px 10px rgba(231, 111, 81, 0.3) !important;
+    transform: scale(1.04) !important;
 }
 
 [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p,
@@ -627,7 +642,38 @@ h4 {
 }
 </style>
 """
+
+icons_css = f"""
+<style>
+/* Option 1: Executive Overview */
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(1)::before {{
+    background-image: url('data:image/png;base64,{b64_exec}') !important;
+}}
+
+/* Option 2: Customer Intelligence & XAI */
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(2)::before {{
+    background-image: url('data:image/png;base64,{b64_intel}') !important;
+}}
+
+/* Option 3: Prescriptive AI & Retention */
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(3)::before {{
+    background-image: url('data:image/png;base64,{b64_presc}') !important;
+}}
+
+/* Option 4: Portfolio Cohort Matrix */
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(4)::before {{
+    background-image: url('data:image/png;base64,{b64_cohort}') !important;
+}}
+
+/* Option 5: Model Benchmarks & Data */
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(5)::before {{
+    background-image: url('data:image/png;base64,{b64_bench}') !important;
+}}
+</style>
+"""
+
 st.markdown(custom_css, unsafe_allow_html=True)
+st.markdown(icons_css, unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------
