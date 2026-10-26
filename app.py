@@ -517,6 +517,7 @@ li[data-baseweb="menu-item"]:hover {
    Cards & Content Components
 --------------------------------------------------------- */
 .card-hero-peach {
+    position: relative;
     background: linear-gradient(135deg, #ffffff 0%, #fff5ee 55%, #ffebe0 100%);
     border: 1px solid #fed8c5;
     border-radius: 16px;
@@ -525,56 +526,172 @@ li[data-baseweb="menu-item"]:hover {
     margin-bottom: 1.25rem;
 }
 
-/* Top Right Page Info Popover Styling */
-[data-testid="stPopover"] {
-    width: 100% !important;
+/* ---------------------------------------------------------
+   Top Right Floating Info Pill & Layered Dialogue Box
+--------------------------------------------------------- */
+.page-info-container {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.4rem;
+    z-index: 9999;
 }
 
-[data-testid="stPopover"] button {
-    background: linear-gradient(135deg, #ffffff 0%, #fff8f4 100%) !important;
-    border: 1.5px solid #fed8c5 !important;
-    color: #e76f51 !important;
-    font-weight: 700 !important;
-    font-size: 0.82rem !important;
-    border-radius: 10px !important;
-    padding: 0.55rem 0.85rem !important;
-    box-shadow: 0 2px 8px rgba(231, 111, 81, 0.08) !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    letter-spacing: 0.02em !important;
-    display: flex !important;
+.page-info-details {
+    position: relative;
+    display: inline-block;
+}
+
+/* Remove default disclosure triangle markers */
+.page-info-details summary {
+    list-style: none !important;
+    outline: none !important;
+    cursor: pointer !important;
+}
+
+.page-info-details summary::-webkit-details-marker,
+.page-info-details summary::marker {
+    display: none !important;
+}
+
+/* Very Small, Clean Info Pill Badge */
+.page-info-pill {
+    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    gap: 5px !important;
+    height: 27px !important;
+    padding: 0 0.65rem !important;
+    background: #ffffff !important;
+    border: 1.5px solid #fed8c5 !important;
+    border-radius: 9999px !important;
+    color: #e76f51 !important;
+    font-size: 0.74rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em !important;
+    box-shadow: 0 2px 6px rgba(231, 111, 81, 0.08) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    user-select: none !important;
 }
 
-[data-testid="stPopover"] button:hover {
-    background: #fff2eb !important;
-    border-color: #f4a261 !important;
+.page-info-pill:hover,
+.page-info-details[open] .page-info-pill {
+    background: #fff4ec !important;
+    border-color: #e76f51 !important;
     color: #b72a00 !important;
-    box-shadow: 0 4px 16px rgba(231, 111, 81, 0.18) !important;
+    box-shadow: 0 3px 12px rgba(231, 111, 81, 0.2) !important;
     transform: translateY(-1px) !important;
 }
 
-/* Suppress broken expand_more ligature text from Streamlit popover button */
-[data-testid="stPopover"] button span:not([data-testid="stMarkdownContainer"] *),
-[data-testid="stPopover"] button .material-symbols-rounded,
-[data-testid="stPopover"] button .material-symbols-outlined,
-[data-testid="stPopover"] button [class*="material-symbols"],
-[data-testid="stPopover"] button > svg {
-    display: none !important;
-    visibility: hidden !important;
-    width: 0 !important;
-    height: 0 !important;
-    font-size: 0 !important;
-    opacity: 0 !important;
+/* The Layered Dialogue Box (Floats directly above page content) */
+.page-info-dialog {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 440px;
+    max-width: min(440px, 86vw);
+    background: #ffffff;
+    border: 1.5px solid #fed8c5;
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+    box-shadow: 0 16px 48px rgba(231, 111, 81, 0.20), 0 4px 14px rgba(0, 0, 0, 0.05);
+    z-index: 999999;
+    text-align: left;
+    cursor: default;
+    box-sizing: border-box;
 }
 
-[data-testid="stPopoverBody"] {
-    border-radius: 14px !important;
-    border: 1.5px solid #fed8c5 !important;
-    box-shadow: 0 12px 40px rgba(231, 111, 81, 0.16) !important;
-    background: #fefbf8 !important;
-    padding: 1rem 1.15rem !important;
-    max-width: 480px !important;
+/* Invisible bridge so mouse hover doesn't flicker between pill and dialog */
+.page-info-dialog::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    height: 10px;
+}
+
+/* Show dialogue box on hover OR when clicked/open */
+.page-info-details:hover .page-info-dialog,
+.page-info-details[open] .page-info-dialog {
+    display: block !important;
+    animation: fadeInDialog 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInDialog {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.info-section-peach {
+    background: #fff8f4;
+    border: 1px solid #fed8c5;
+    border-radius: 9px;
+    padding: 0.7rem 0.85rem;
+    margin-bottom: 0.65rem;
+}
+
+.info-section-white {
+    background: #ffffff;
+    border: 1px solid #f6ded2;
+    border-radius: 9px;
+    padding: 0.7rem 0.85rem;
+    margin-bottom: 0.65rem;
+}
+
+.info-section-title {
+    color: #d84315;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 0.28rem;
+}
+
+.info-section-title-dark {
+    color: #261914;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 0.32rem;
+}
+
+.info-section-body {
+    font-size: 0.82rem;
+    color: #3b2c25;
+    line-height: 1.45;
+}
+
+.info-bullet-list {
+    font-size: 0.82rem;
+    color: #5a4840;
+    margin: 0;
+    padding-left: 1.15rem;
+    line-height: 1.45;
+}
+
+.info-bullet-list li {
+    margin-bottom: 0.35rem;
+}
+
+.info-bullet-list li:last-child {
+    margin-bottom: 0;
+}
+
+.info-action-protocol {
+    border-top: 1px dashed #fed8c5;
+    padding-top: 0.45rem;
+    font-size: 0.8rem;
+    color: #6d5b52;
 }
 
 .metric-card-peach {
@@ -796,10 +913,58 @@ def render_page_header_with_info(
     how_it_works: str,
     action_protocol: str
 ) -> None:
-    col_hero, col_info = st.columns([3.85, 1.15])
-    with col_hero:
-        render_html(f"""
-        <div class="card-hero-peach" style="margin-bottom: 1.25rem;">
+    list_items_html = "".join([f"<li>{item}</li>" for item in what_it_tells])
+    
+    render_html(f"""
+    <div class="card-hero-peach" style="margin-bottom: 1.25rem;">
+        <div class="page-info-container">
+            <details class="page-info-details">
+                <summary class="page-info-pill" title="Page Information & Guide">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span>Info</span>
+                </summary>
+                
+                <div class="page-info-dialog">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
+                        <div style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #e76f51;">
+                            Platform Documentation
+                        </div>
+                        <div style="font-size: 0.72rem; color: #a89288; font-weight: 500;">
+                            Hover or click to pin
+                        </div>
+                    </div>
+                    <h3 style="margin: 0 0 0.75rem 0; font-size: 1.1rem; color: #1a120e; font-weight: 800; letter-spacing: -0.02em;">
+                        {page_title}
+                    </h3>
+                    
+                    <div class="info-section-peach">
+                        <strong class="info-section-title">Core Purpose & Scope</strong>
+                        <div class="info-section-body">{purpose}</div>
+                    </div>
+
+                    <div class="info-section-white">
+                        <strong class="info-section-title-dark">Information Provided</strong>
+                        <ul class="info-bullet-list">
+                            {list_items_html}
+                        </ul>
+                    </div>
+
+                    <div class="info-section-white" style="margin-bottom: 0;">
+                        <strong class="info-section-title-dark">Methodology & Operational Protocol</strong>
+                        <div class="info-section-body" style="margin-bottom: 0.45rem;">{how_it_works}</div>
+                        <div class="info-action-protocol">
+                            <strong style="color: #0da371;">Action Protocol:</strong> {action_protocol}
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <div style="padding-right: 85px;">
             <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e76f51; margin-bottom: 0.35rem;">
                 {category_subtitle}
             </div>
@@ -810,51 +975,8 @@ def render_page_header_with_info(
                 {description}
             </p>
         </div>
-        """)
-    with col_info:
-        st.markdown("<div style='height: 0.35rem;'></div>", unsafe_allow_html=True)
-        with st.popover("Page Guide & Info", width="stretch"):
-            list_items_html = "".join([f"<li style='margin-bottom: 0.4rem;'>{item}</li>" for item in what_it_tells])
-            render_html(f"""
-            <div style="padding: 0.25rem 0.1rem; font-family: 'Plus Jakarta Sans', sans-serif;">
-                <div style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #e76f51; margin-bottom: 0.2rem;">
-                    Platform Documentation
-                </div>
-                <h3 style="margin: 0 0 0.85rem 0; font-size: 1.12rem; color: #1a120e; font-weight: 800; letter-spacing: -0.02em;">
-                    {page_title}
-                </h3>
-                
-                <div style="background: #fff8f4; border: 1px solid #fed8c5; border-radius: 9px; padding: 0.75rem 0.85rem; margin-bottom: 0.75rem;">
-                    <strong style="color: #d84315; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 0.3rem;">
-                        Core Purpose & Scope
-                    </strong>
-                    <div style="font-size: 0.84rem; color: #3b2c25; line-height: 1.45;">
-                        {purpose}
-                    </div>
-                </div>
-
-                <div style="background: #ffffff; border: 1px solid #f6ded2; border-radius: 9px; padding: 0.75rem 0.85rem; margin-bottom: 0.75rem;">
-                    <strong style="color: #261914; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 0.35rem;">
-                        Information Provided
-                    </strong>
-                    <ul style="font-size: 0.82rem; color: #5a4840; margin: 0; padding-left: 1.1rem; line-height: 1.45;">
-                        {list_items_html}
-                    </ul>
-                </div>
-
-                <div style="background: #ffffff; border: 1px solid #f6ded2; border-radius: 9px; padding: 0.75rem 0.85rem; margin-bottom: 0.25rem;">
-                    <strong style="color: #261914; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 0.35rem;">
-                        Methodology & Operational Protocol
-                    </strong>
-                    <div style="font-size: 0.82rem; color: #5a4840; line-height: 1.45; margin-bottom: 0.5rem;">
-                        {how_it_works}
-                    </div>
-                    <div style="border-top: 1px dashed #fed8c5; padding-top: 0.45rem; font-size: 0.8rem; color: #6d5b52;">
-                        <strong style="color: #0da371;">Action Protocol:</strong> {action_protocol}
-                    </div>
-                </div>
-            </div>
-            """)
+    </div>
+    """)
 
 
 # ---------------------------------------------------------
