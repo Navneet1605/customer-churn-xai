@@ -77,6 +77,8 @@ html, body, [class*="css"], .stMarkdown, p, div, span, label {
 
 /* ---------------------------------------------------------
    Sidebar: Hover Expandable & Minimizable Navigation
+/* ---------------------------------------------------------
+   Sidebar: Layered Overlay Navigation (Zero Layout Shift)
 --------------------------------------------------------- */
 /* Suppress Streamlit's default collapse chevron so sidebar is purely hover-driven */
 [data-testid="stSidebarCollapseButton"],
@@ -85,25 +87,32 @@ button[data-testid="stSidebarCollapseButton"] {
     display: none !important;
 }
 
+/* Base fixed sidebar overlay: floats ABOVE the page */
 [data-testid="stSidebar"] {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
     width: 74px !important;
     min-width: 74px !important;
     max-width: 74px !important;
     overflow-x: hidden !important;
     white-space: nowrap !important;
-    transition: width 0.32s cubic-bezier(0.2, 0, 0, 1), min-width 0.32s cubic-bezier(0.2, 0, 0, 1), max-width 0.32s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.32s ease !important;
-    z-index: 99999 !important;
-    background: linear-gradient(180deg, #ffffff 0%, #fff7f2 60%, #ffefe5 100%) !important;
+    transition: width 0.3s cubic-bezier(0.2, 0, 0, 1), min-width 0.3s cubic-bezier(0.2, 0, 0, 1), max-width 0.3s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.3s ease !important;
+    z-index: 999999 !important;
+    background: linear-gradient(180deg, #ffffff 0%, #fff9f5 60%, #fff1e8 100%) !important;
     border-right: 1px solid #fed8c5 !important;
     box-shadow: 2px 0 16px rgba(231, 111, 81, 0.08) !important;
 }
 
+/* Expanded state on hover - layers seamlessly above the page without pushing */
 [data-testid="stSidebar"]:hover,
 [data-testid="stSidebar"]:focus-within {
     width: 320px !important;
     min-width: 320px !important;
     max-width: 320px !important;
-    box-shadow: 12px 0 42px rgba(231, 111, 81, 0.22) !important;
+    box-shadow: 14px 0 48px rgba(231, 111, 81, 0.22) !important;
 }
 
 [data-testid="stSidebar"] [data-testid="stSidebarContent"] {
@@ -111,29 +120,69 @@ button[data-testid="stSidebarCollapseButton"] {
     min-width: 320px !important;
     overflow-x: hidden !important;
     padding-top: 1.25rem !important;
-    padding-left: 0.85rem !important;
-    padding-right: 0.85rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
     box-sizing: border-box !important;
 }
 
-/* Offset main view by 74px so dashboard content is never obscured */
+/* Keep the main page in a fixed, non-reactive position: NEVER shifts or reflows on hover */
 [data-testid="stAppViewContainer"] > .main,
-[data-testid="stMain"] {
+[data-testid="stMain"],
+.main {
     margin-left: 74px !important;
-    transition: margin-left 0.3s ease !important;
+    width: calc(100vw - 74px) !important;
+    max-width: calc(100vw - 74px) !important;
+    transition: none !important;
 }
 
 /* ---------------------------------------------------------
-   Sidebar Radio Navigation: 100% High-Contrast Legibility
+   Sidebar Minimized vs Hover Visibility Rules
 --------------------------------------------------------- */
-/* Force rich dark charcoal typography on all radio labels */
+/* When sidebar is minimized: hide text, show only symbols */
+[data-testid="stSidebar"]:not(:hover) .sidebar-brand-text {
+    display: none !important;
+}
+
+[data-testid="stSidebar"]:not(:hover) [data-testid="stRadio"] [data-testid="stMarkdownContainer"] {
+    display: none !important;
+}
+
+[data-testid="stSidebar"]:not(:hover) .sidebar-telemetry {
+    display: none !important;
+}
+
+/* When sidebar is hovered: smoothly reveal text */
+[data-testid="stSidebar"]:hover .sidebar-brand-text {
+    display: block !important;
+    animation: fadeInText 0.22s ease;
+}
+
+[data-testid="stSidebar"]:hover [data-testid="stRadio"] [data-testid="stMarkdownContainer"] {
+    display: block !important;
+    animation: fadeInText 0.22s ease;
+    margin-left: 10px !important;
+}
+
+[data-testid="stSidebar"]:hover .sidebar-telemetry {
+    display: block !important;
+    animation: fadeInText 0.25s ease;
+}
+
+@keyframes fadeInText {
+    from { opacity: 0; transform: translateX(-6px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* ---------------------------------------------------------
+   Sidebar Radio Navigation: Symbols & Luxury Item Cards
+--------------------------------------------------------- */
+/* Force rich dark charcoal typography */
 [data-testid="stSidebar"] [data-testid="stRadio"],
 [data-testid="stSidebar"] [data-testid="stRadio"] div,
 [data-testid="stSidebar"] [data-testid="stRadio"] label,
 [data-testid="stSidebar"] [data-testid="stRadio"] p,
 [data-testid="stSidebar"] [data-testid="stRadio"] span,
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
-[data-testid="stSidebar"] div[role="radiogroup"] label,
 [data-testid="stSidebar"] div[role="radiogroup"] label p,
 [data-testid="stSidebar"] div[role="radiogroup"] label span {
     color: #1a120e !important;
@@ -151,24 +200,91 @@ button[data-testid="stSidebarCollapseButton"] {
     margin-top: 0.5rem !important;
 }
 
-/* Luxury card wrapper for each radio option */
+/* Hide default native small radio circle */
+[data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child {
+    display: none !important;
+}
+
+/* Radio Option Card Base */
 [data-testid="stSidebar"] div[role="radiogroup"] label {
     background: #ffffff !important;
     border: 1px solid #f6ded2 !important;
     border-radius: 12px !important;
-    padding: 10px 14px !important;
     transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
     cursor: pointer !important;
     margin: 0 !important;
     display: flex !important;
     align-items: center !important;
     box-shadow: 0 1px 4px rgba(231, 111, 81, 0.04) !important;
+    min-height: 44px !important;
 }
 
+/* When minimized: card shrinks to a neat 46px square icon container */
+[data-testid="stSidebar"]:not(:hover) div[role="radiogroup"] label {
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 46px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    margin-left: 2px !important;
+}
+
+/* When hovered: card expands to full width with comfortable padding */
+[data-testid="stSidebar"]:hover div[role="radiogroup"] label {
+    width: 100% !important;
+    padding: 8px 12px !important;
+    justify-content: flex-start !important;
+}
+
+/* Basic Symbol Badge for each page item */
+[data-testid="stSidebar"] div[role="radiogroup"] label::before {
+    content: '' !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 9px !important;
+    background-color: #fff8f4 !important;
+    border: 1px solid #fed8c5 !important;
+    flex-shrink: 0 !important;
+    transition: all 0.2s ease !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 19px 19px !important;
+}
+
+/* Symbol 1: Executive Overview (Bar chart / telemetry) */
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(1)::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23e76f51' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='20' x2='18' y2='10'%3E%3C/line%3E%3Cline x1='12' y1='20' x2='12' y2='4'%3E%3C/line%3E%3Cline x1='6' y1='20' x2='6' y2='14'%3E%3C/line%3E%3C/svg%3E") !important;
+}
+
+/* Symbol 2: Customer Intelligence & XAI (User diagnostic radar) */
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(2)::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23e76f51' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E") !important;
+}
+
+/* Symbol 3: Prescriptive AI & Retention (Target recourse optimizer) */
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(3)::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%230da371' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Ccircle cx='12' cy='12' r='6'%3E%3C/circle%3E%3Ccircle cx='12' cy='12' r='2'%3E%3C/circle%3E%3C/svg%3E") !important;
+}
+
+/* Symbol 4: Portfolio Cohort Matrix (2x2 Matrix Grid) */
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(4)::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23f4a261' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7'%3E%3C/rect%3E%3Crect x='14' y='3' width='7' height='7'%3E%3C/rect%3E%3Crect x='14' y='14' width='7' height='7'%3E%3C/rect%3E%3Crect x='3' y='14' width='7' height='7'%3E%3C/rect%3E%3C/svg%3E") !important;
+}
+
+/* Symbol 5: Model Benchmarks & Data (Server Lake Architecture) */
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(5)::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236d5b52' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cellipse cx='12' cy='5' rx='9' ry='3'%3E%3C/ellipse%3E%3Cpath d='M21 12c0 1.66-4 3-9 3s-9-1.34-9-3'%3E%3C/path%3E%3Cpath d='M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5'%3E%3C/path%3E%3C/svg%3E") !important;
+}
+
+/* Card hover glow */
 [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
     background: #fff4ed !important;
     border-color: #f4a261 !important;
-    transform: translateX(4px) !important;
+    transform: translateX(3px) !important;
     box-shadow: 0 4px 14px rgba(231, 111, 81, 0.14) !important;
 }
 
@@ -185,18 +301,34 @@ button[data-testid="stSidebarCollapseButton"] {
     box-shadow: 0 4px 16px rgba(231, 111, 81, 0.2) !important;
 }
 
+[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)::before {
+    background-color: #e76f51 !important;
+    border-color: #e76f51 !important;
+    box-shadow: 0 2px 8px rgba(231, 111, 81, 0.35) !important;
+}
+
+/* Selected state white icon overrides */
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(1):has(input:checked)::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='20' x2='18' y2='10'%3E%3C/line%3E%3Cline x1='12' y1='20' x2='12' y2='4'%3E%3C/line%3E%3Cline x1='6' y1='20' x2='6' y2='14'%3E%3C/line%3E%3C/svg%3E") !important;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(2):has(input:checked)::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E") !important;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(3):has(input:checked)::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Ccircle cx='12' cy='12' r='6'%3E%3C/circle%3E%3Ccircle cx='12' cy='12' r='2'%3E%3C/circle%3E%3C/svg%3E") !important;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(4):has(input:checked)::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7'%3E%3C/rect%3E%3Crect x='14' y='3' width='7' height='7'%3E%3C/rect%3E%3Crect x='14' y='14' width='7' height='7'%3E%3C/rect%3E%3Crect x='3' y='14' width='7' height='7'%3E%3C/rect%3E%3C/svg%3E") !important;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(5):has(input:checked)::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cellipse cx='12' cy='5' rx='9' ry='3'%3E%3C/ellipse%3E%3Cpath d='M21 12c0 1.66-4 3-9 3s-9-1.34-9-3'%3E%3C/path%3E%3Cpath d='M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5'%3E%3C/path%3E%3C/svg%3E") !important;
+}
+
 [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p,
 [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) span {
     color: #b72a00 !important;
     -webkit-text-fill-color: #b72a00 !important;
     font-weight: 800 !important;
-}
-
-/* Radio button dot color */
-[data-testid="stSidebar"] input[type="radio"] {
-    accent-color: #e76f51 !important;
-    width: 16px !important;
-    height: 16px !important;
 }
 
 /* ---------------------------------------------------------
@@ -252,10 +384,73 @@ li[data-baseweb="menu-item"]:hover {
     color: #e76f51 !important;
 }
 
+/* ---------------------------------------------------------
+   Slider Variety: Multi-color Palettes from User Swatches
+--------------------------------------------------------- */
 .stSlider div[data-baseweb="slider"] div[role="slider"] {
-    background-color: #e76f51 !important;
     border: 2px solid #ffffff !important;
-    box-shadow: 0 2px 8px rgba(231, 111, 81, 0.4) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+.stSlider div[data-baseweb="slider"] div[role="slider"]:hover {
+    transform: scale(1.18) !important;
+}
+
+/* Monthly Charges Slider: Golden Apricot / Amber */
+.stSlider:has([aria-label*="Monthly Charges"]) div[data-baseweb="slider"] div[role="slider"],
+.stSlider:nth-of-type(1) div[data-baseweb="slider"] div[role="slider"] {
+    background-color: #f4a261 !important;
+    box-shadow: 0 2px 10px rgba(244, 162, 97, 0.5) !important;
+}
+.stSlider:has([aria-label*="Monthly Charges"]) div[data-baseweb="slider"] > div > div:nth-child(1),
+.stSlider:nth-of-type(1) div[data-baseweb="slider"] > div > div:nth-child(1) {
+    background: #f4a261 !important;
+}
+.stSlider:has([aria-label*="Monthly Charges"]) [data-testid="stThumbValue"],
+.stSlider:nth-of-type(1) [data-testid="stThumbValue"] {
+    color: #d97706 !important;
+    font-weight: 700 !important;
+}
+
+/* Account Tenure Slider: Eucalyptus / Sage Teal */
+.stSlider:has([aria-label*="Tenure"]) div[data-baseweb="slider"] div[role="slider"],
+.stSlider:nth-of-type(2) div[data-baseweb="slider"] div[role="slider"] {
+    background-color: #2a9d8f !important;
+    box-shadow: 0 2px 10px rgba(42, 157, 143, 0.5) !important;
+}
+.stSlider:has([aria-label*="Tenure"]) div[data-baseweb="slider"] > div > div:nth-child(1),
+.stSlider:nth-of-type(2) div[data-baseweb="slider"] > div > div:nth-child(1) {
+    background: #2a9d8f !important;
+}
+.stSlider:has([aria-label*="Tenure"]) [data-testid="stThumbValue"],
+.stSlider:nth-of-type(2) [data-testid="stThumbValue"] {
+    color: #2a9d8f !important;
+    font-weight: 700 !important;
+}
+
+/* Target Safety Threshold Slider: Fresh Emerald Mint */
+.stSlider:has([aria-label*="Threshold"]) div[data-baseweb="slider"] div[role="slider"] {
+    background-color: #0da371 !important;
+    box-shadow: 0 2px 10px rgba(13, 163, 113, 0.5) !important;
+}
+.stSlider:has([aria-label*="Threshold"]) div[data-baseweb="slider"] > div > div:nth-child(1) {
+    background: #0da371 !important;
+}
+.stSlider:has([aria-label*="Threshold"]) [data-testid="stThumbValue"] {
+    color: #0da371 !important;
+    font-weight: 700 !important;
+}
+
+/* Loyalty Discount Slider: Warm Coral Terracotta */
+.stSlider:has([aria-label*="Discount"]) div[data-baseweb="slider"] div[role="slider"] {
+    background-color: #ff6b4a !important;
+    box-shadow: 0 2px 10px rgba(255, 107, 74, 0.5) !important;
+}
+.stSlider:has([aria-label*="Discount"]) div[data-baseweb="slider"] > div > div:nth-child(1) {
+    background: #ff6b4a !important;
+}
+.stSlider:has([aria-label*="Discount"]) [data-testid="stThumbValue"] {
+    color: #d84315 !important;
+    font-weight: 700 !important;
 }
 
 .stSlider div[data-baseweb="slider"] div[data-testid="stTickBar"] > div {
@@ -537,7 +732,7 @@ with st.sidebar:
         <div style="min-width: 42px; width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, #e76f51 0%, #d85c3e 100%); display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 800; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(231, 111, 81, 0.35); flex-shrink: 0;">
             CI
         </div>
-        <div style="overflow: hidden; white-space: nowrap;">
+        <div class="sidebar-brand-text" style="overflow: hidden; white-space: nowrap;">
             <div style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #e76f51; line-height: 1.2;">
                 Enterprise Intelligence
             </div>
@@ -564,7 +759,7 @@ with st.sidebar:
     )
 
     render_html("""
-    <div style="margin-top: 2rem; padding: 1.15rem; background: #ffffff; border: 1px solid #f6ded2; border-radius: 12px; box-shadow: 0 4px 14px rgba(231, 111, 81, 0.05);">
+    <div class="sidebar-telemetry" style="margin-top: 2rem; padding: 1.15rem; background: #ffffff; border: 1px solid #f6ded2; border-radius: 12px; box-shadow: 0 4px 14px rgba(231, 111, 81, 0.05);">
         <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #8e7a70; margin-bottom: 0.5rem;">
             System Telemetry
         </div>
@@ -917,23 +1112,39 @@ elif page_selection == "Customer Intelligence & XAI":
             paired_shap = list(zip(readable_names, single_shap))
             top_contributors = sorted(paired_shap, key=lambda x: abs(x[1]), reverse=True)[:7]
             top_feats_df = pd.DataFrame(top_contributors, columns=["Feature", "SHAP Impact"])
-            top_feats_df["Impact Direction"] = top_feats_df["SHAP Impact"].apply(lambda v: "Accelerates Churn Risk" if v > 0 else "Protective Retention Anchor")
+            # Palette mapping from user swatch: distinct tonal hues across top drivers
+            coral_palette = ["#d84315", "#ff6b4a", "#f28e79", "#f4a261", "#e99d42", "#fac984", "#fed6a4"]
+            emerald_palette = ["#0da371", "#2a9d8f", "#52b788", "#74c69d", "#84a98c", "#a3b18a", "#b7e4c7"]
 
-            fig_shap_bar = px.bar(
-                top_feats_df,
-                x="SHAP Impact",
-                y="Feature",
+            pos_idx = 0
+            neg_idx = 0
+            bar_colors = []
+            for val in top_feats_df["SHAP Impact"]:
+                if val >= 0:
+                    bar_colors.append(coral_palette[min(pos_idx, len(coral_palette) - 1)])
+                    pos_idx += 1
+                else:
+                    bar_colors.append(emerald_palette[min(neg_idx, len(emerald_palette) - 1)])
+                    neg_idx += 1
+
+            top_feats_df["BarColor"] = bar_colors
+
+            fig_shap_bar = go.Figure(go.Bar(
+                x=top_feats_df["SHAP Impact"],
+                y=top_feats_df["Feature"],
                 orientation='h',
-                color="Impact Direction",
-                color_discrete_map={"Accelerates Churn Risk": "#ff6b4a", "Protective Retention Anchor": "#0da371"},
-                height=280
-            )
+                marker=dict(
+                    color=top_feats_df["BarColor"],
+                    line=dict(color='#ffffff', width=1.5)
+                ),
+                hovertemplate="<b>%{y}</b><br>Marginal SHAP: %{x:+.3f}<extra></extra>"
+            ))
             fig_shap_bar.update_layout(
-                yaxis={'categoryorder': 'total ascending', 'tickfont': {'color': '#261914'}},
-                xaxis={'title': "Marginal SHAP Contribution", 'gridcolor': '#f3e3da', 'tickfont': {'color': '#261914'}},
+                yaxis={'categoryorder': 'total ascending', 'tickfont': {'color': '#261914', 'family': 'Plus Jakarta Sans', 'size': 12}},
+                xaxis={'title': "Marginal SHAP Contribution (Log-Odds Impact)", 'gridcolor': '#f3e3da', 'tickfont': {'color': '#261914', 'family': 'Plus Jakarta Sans'}},
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
-                legend=dict(orientation="h", yanchor="bottom", y=-0.35, xanchor="center", x=0.5, title=None, font=dict(color='#261914')),
+                height=290,
                 margin=dict(l=10, r=10, t=10, b=10)
             )
             st.plotly_chart(fig_shap_bar, use_container_width=True)
