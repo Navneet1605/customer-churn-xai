@@ -13,8 +13,11 @@ import os
 import sys
 import json
 import pickle
+import warnings
 from pathlib import Path
 from typing import Dict, Any, List
+
+warnings.filterwarnings("ignore")
 
 import pandas as pd
 import numpy as np
@@ -864,7 +867,7 @@ if page_selection == "Executive Overview":
             plot_bgcolor="rgba(0,0,0,0)",
             legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5, font=dict(color='#261914'))
         )
-        st.plotly_chart(fig_donut, use_container_width=True)
+        st.plotly_chart(fig_donut, width="stretch")
 
     with col_v2:
         render_html("""
@@ -891,7 +894,7 @@ if page_selection == "Executive Overview":
                 xaxis=dict(gridcolor="#f3e3da", tickfont=dict(color='#261914')),
                 yaxis=dict(gridcolor="#f3e3da", tickfont=dict(color='#261914'))
             )
-            st.plotly_chart(fig_contract, use_container_width=True)
+            st.plotly_chart(fig_contract, width="stretch")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -921,7 +924,7 @@ if page_selection == "Executive Overview":
                 xaxis=dict(title="Churn Rate (%)", gridcolor="#f3e3da", tickfont=dict(color='#261914')),
                 yaxis=dict(title=None, tickfont=dict(color='#261914'))
             )
-            st.plotly_chart(fig_internet, use_container_width=True)
+            st.plotly_chart(fig_internet, width="stretch")
 
     with col_b2:
         render_html("""
@@ -947,7 +950,7 @@ if page_selection == "Executive Overview":
                 xaxis=dict(title="Churn Rate (%)", gridcolor="#f3e3da", tickfont=dict(color='#261914')),
                 yaxis=dict(title=None, tickfont=dict(color='#261914'))
             )
-            st.plotly_chart(fig_payment, use_container_width=True)
+            st.plotly_chart(fig_payment, width="stretch")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1089,7 +1092,7 @@ elif page_selection == "Customer Intelligence & XAI":
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)"
             )
-            st.plotly_chart(fig_gauge, use_container_width=True)
+            st.plotly_chart(fig_gauge, width="stretch")
 
             # Local SHAP Risk Drivers Bar Chart
             st.markdown("#### Primary Churn Drivers (Local SHAP Attribution)")
@@ -1147,7 +1150,7 @@ elif page_selection == "Customer Intelligence & XAI":
                 height=290,
                 margin=dict(l=10, r=10, t=10, b=10)
             )
-            st.plotly_chart(fig_shap_bar, use_container_width=True)
+            st.plotly_chart(fig_shap_bar, width="stretch")
 
             # Local SHAP Educational Explanation Box
             render_html("""
@@ -1442,7 +1445,7 @@ elif page_selection == "Prescriptive AI & Retention":
                     paper_bgcolor="rgba(0,0,0,0)",
                     plot_bgcolor="rgba(0,0,0,0)"
                 )
-                st.plotly_chart(fig_dual_gauge, use_container_width=True)
+                st.plotly_chart(fig_dual_gauge, width="stretch")
 
                 col_res1, col_res2, col_res3 = st.columns(3)
                 with col_res1:
@@ -1633,7 +1636,7 @@ elif page_selection == "Portfolio Cohort Matrix":
                     yaxis=dict(gridcolor="#f3e3da", tickfont=dict(color='#261914')),
                     legend=dict(orientation="h", yanchor="bottom", y=-0.32, xanchor="center", x=0.5, title=None, font=dict(color='#261914'))
                 )
-                st.plotly_chart(fig_matrix, use_container_width=True)
+                st.plotly_chart(fig_matrix, width="stretch")
 
             with col_sc2:
                 render_html("""
@@ -1660,7 +1663,7 @@ elif page_selection == "Portfolio Cohort Matrix":
             if "customerID" in df_scored.columns:
                 display_cols = ["customerID"] + display_cols
             available_cols = [c for c in display_cols if c in df_scored.columns]
-            st.dataframe(df_scored[available_cols].head(100), use_container_width=True)
+            st.dataframe(df_scored[available_cols].head(100), width="stretch")
 
             csv_export = df_scored.to_csv(index=False).encode('utf-8')
             st.download_button(
@@ -1668,7 +1671,7 @@ elif page_selection == "Portfolio Cohort Matrix":
                 data=csv_export,
                 file_name="prescriptive_scored_cohort.csv",
                 mime="text/csv",
-                use_container_width=True
+                width="stretch"
             )
 
 
@@ -1698,7 +1701,7 @@ elif page_selection == "Model Benchmarks & Data":
         st.subheader("Model Performance Leaderboard")
         st.dataframe(
             m_df[["Model", "Accuracy", "Precision", "Recall", "F1_Score", "ROC_AUC", "PR_AUC"]],
-            use_container_width=True
+            width="stretch"
         )
 
         render_html("""
@@ -1801,7 +1804,7 @@ data/hdfs_simulation/warehouse/telco/
                     "Distinct Values": [df_sample[c].nunique() for c in df_sample.columns],
                     "Null Count": [df_sample[c].isna().sum() for c in df_sample.columns]
                 })
-                st.dataframe(dtype_df, use_container_width=True)
+                st.dataframe(dtype_df, width="stretch")
 
     else:
         st.warning("Model evaluation metrics not found.")
