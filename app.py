@@ -1033,14 +1033,25 @@ def load_best_model_and_explainer():
     pipeline = None
     if best_file:
         best_path = Path(best_file)
-        if not best_path.is_absolute():
-            best_path = BASE_DIR / best_path
+        if not best_path.exists():
+            best_path = BASE_DIR / "models" / Path(best_file).name
+        if not best_path.exists():
+            best_path = BASE_DIR / "models" / "Gradient_Boosted_Trees_pipeline.pkl"
         if best_path.exists():
             try:
                 with open(best_path, "rb") as f:
                     pipeline = pickle.load(f)
             except Exception as err:
                 warnings.warn(f"Failed to unpickle champion pipeline: {err}")
+
+    if pipeline is None:
+        fallback_path = BASE_DIR / "models" / "Gradient_Boosted_Trees_pipeline.pkl"
+        if fallback_path.exists():
+            try:
+                with open(fallback_path, "rb") as f:
+                    pipeline = pickle.load(f)
+            except Exception as err:
+                warnings.warn(f"Fallback champion pipeline unpickle failed: {err}")
 
     explainer_path = BASE_DIR / "models" / "shap_explainer.pkl"
     explainer_obj = None
